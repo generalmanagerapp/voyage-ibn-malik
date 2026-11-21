@@ -184,9 +184,9 @@ th{font-weight:700;color:var(--mut)}
 
     <div class="card"><h2>Copies du passeport et de la carte d'identité</h2>
       <label class="btn ghost file">Ajouter le document (photo, JPG, PNG ou PDF)<input type="file" id="photoIn" accept="image/*,application/pdf" multiple></label>
-      <div class="hint"><b>Facultatif.</b> Joignez les <b>deux</b> : page photo du passeport bien lisible, et carte d'identité recto <b>et</b> verso. 5 fichiers max.</div>
+      <div class="hint"><b>Obligatoire.</b> Joignez les <b>deux</b> : page photo du passeport bien lisible, et carte d'identité recto <b>et</b> verso (au moins 2 fichiers, 5 max).</div>
       <div class="pv" id="pv"></div>
-      <div style="margin-top:14px"><label>Sur la photo du document <span class="hint">(si vous joignez un document)</span></label>
+      <div style="margin-top:14px"><label>Sur la photo du document <span class="r">*</span></label>
         <div class="seg"><label><input type="radio" name="voile" value="Avec voile"> Avec voile</label><label><input type="radio" name="voile" value="Sans voile"> Sans voile</label></div>
       </div>
     </div>
@@ -201,7 +201,10 @@ th{font-weight:700;color:var(--mut)}
     <div class="card"><h2>Carte nationale d'identité</h2><div class="grid">
       <div><label for="ciNum">Numéro <span class="r">*</span></label><input id="ciNum" name="ciNum" class="up" required></div>
       <div><label for="ciExp">Expire le <span class="r">*</span></label><input id="ciExp" name="ciExpiration" type="date" required></div>
-      <div class="full"><label for="ciDel">Délivrée le</label><input id="ciDel" name="ciDelivrance" type="date"></div>
+      <div><label for="ciDel">Délivrée le</label><input id="ciDel" name="ciDelivrance" type="date"></div>
+      <div><label for="ciPays">Pays de délivrance <span class="r">*</span></label><input id="ciPays" name="ciPays" list="paysList" required value="France" autocomplete="off"></div>
+      <div id="ciNote" class="hint" style="grid-column:1/-1;display:none;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink)"></div>
+      <datalist id="paysList"></datalist>
     </div></div>
 
     <div class="card"><h2>Coordonnées</h2><div class="grid">
@@ -318,7 +321,27 @@ function renderAll(){
 (function(){const n=document.getElementById('nat'),v=document.getElementById('visaNote');if(!n||!v)return;
   const f=()=>{const t=(n.value||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');v.style.display=(t&&!/^fran[cç]/.test(t)&&t!=='france')?'block':'none'};
   n.addEventListener('input',f);f()})();
-const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['profession','Profession'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['assistance','Assistance'],['remarques','Remarques']];
+
+// pays de délivrance de la CI / passeport : détection d'après la nationalité
+(function(){
+  const PAYS=['Afghanistan','Albanie','Algérie','Allemagne','Arabie saoudite','Belgique','Bénin','Bosnie-Herzégovine','Burkina Faso','Cameroun','Comores','Congo (RDC)','Congo','Côte d\'Ivoire','Égypte','Espagne','France','Gabon','Ghana','Guinée','Inde','Irak','Italie','Kosovo','Liban','Libye','Madagascar','Mali','Maroc','Maurice','Mauritanie','Niger','Nigéria','Pakistan','Pays-Bas','Pologne','Portugal','Roumanie','Royaume-Uni','Russie','Sénégal','Suisse','Syrie','Tchad','Togo','Tunisie','Turquie','Ukraine'];
+  const NAT=[[/^fran[cç]ais/,'France'],[/^alg[eé]rien/,'Algérie'],[/^marocain/,'Maroc'],[/^tunisien/,'Tunisie'],[/^turc/,'Turquie'],[/^s[eé]n[eé]galais/,'Sénégal'],[/^malien/,'Mali'],[/^ivoirien/,"Côte d'Ivoire"],[/^camerounais/,'Cameroun'],[/^comorien/,'Comores'],[/^congolais/,'Congo'],[/^gu[ié]n[eé]en/,'Guinée'],[/^mauritanien/,'Mauritanie'],[/^[eé]gyptien/,'Égypte'],[/^libanais/,'Liban'],[/^syrien/,'Syrie'],[/^irakien/,'Irak'],[/^afghan/,'Afghanistan'],[/^pakistanais/,'Pakistan'],[/^indien/,'Inde'],[/^portugais/,'Portugal'],[/^espagnol/,'Espagne'],[/^italien/,'Italie'],[/^allemand/,'Allemagne'],[/^belge/,'Belgique'],[/^suisse/,'Suisse'],[/^(britannique|anglais)/,'Royaume-Uni'],[/^nig[eé]rian/,'Nigéria'],[/^nig[eé]rien/,'Niger'],[/^ghan[eé]en/,'Ghana'],[/^tchadien/,'Tchad'],[/^burkinab/,'Burkina Faso'],[/^gabonais/,'Gabon'],[/^malgache/,'Madagascar'],[/^mauricien/,'Maurice'],[/^russe/,'Russie'],[/^ukrainien/,'Ukraine'],[/^roumain/,'Roumanie'],[/^polonais/,'Pologne'],[/^bosniaque/,'Bosnie-Herzégovine'],[/^albanais/,'Albanie'],[/^kosovar/,'Kosovo'],[/^libyen/,'Libye'],[/^togolais/,'Togo'],[/^b[eé]ninois/,'Bénin'],[/^n[eé]erlandais|^hollandais/,'Pays-Bas'],[/^saoudien/,'Arabie saoudite']];
+  const norm=t=>(t||'').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const detect=t=>{const n=norm(t);if(!n)return null;for(const [re,p] of NAT){if(re.test(n)||re.test(t.trim().toLowerCase()))return p}
+    const direct=PAYS.find(p=>norm(p)===n);return direct||null};
+  const nat=document.getElementById('nat'),ci=document.getElementById('ciPays'),pp=document.getElementById('ppPays'),note=document.getElementById('ciNote'),dl=document.getElementById('paysList');
+  if(!nat||!ci)return;
+  dl.innerHTML=PAYS.map(p=>`<option value="${p}">`).join('');
+  pp.setAttribute('list','paysList');
+  const set=(el,val)=>{if(!el.dataset.touched||el.dataset.auto===el.value){el.value=val;el.dataset.auto=val}};
+  [ci,pp].forEach(el=>el.addEventListener('input',()=>{if(el.value!==el.dataset.auto)el.dataset.touched='1'}));
+  const run=()=>{const t=nat.value,p=detect(t),fr=!t.trim()||p==='France'||/^fran/.test(norm(t));
+    if(fr){set(ci,'France');set(pp,'France');note.style.display='none';return}
+    if(p){set(ci,p);set(pp,p);note.textContent=`Nationalité ${t.trim()} : carte d'identité probablement délivrée par ${p} (proposé ci-dessus, corrigez si besoin).`}
+    else{set(ci,'');set(pp,'');note.textContent="Nationalité étrangère : indiquez le pays qui a délivré la carte d'identité (et le passeport)."}
+    note.style.display='block'};
+  nat.addEventListener('input',run);run()})();
+const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['profession','Profession'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciPays','CI pays'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['assistance','Assistance'],['remarques','Remarques']];
 $('copyCsv').onclick=async()=>{const dates=['naissance','ppDelivrance','ppExpiration','ciDelivrance','ciExpiration'];
   const t=[COLS.map(c=>c[1]).join('\t'),...all.map(v=>COLS.map(c=>String(dates.includes(c[0])?fr(v[c[0]]):(v[c[0]]??'')).replace(/[\t\n]/g,' ')).join('\t'))].join('\n');
   try{await navigator.clipboard.writeText(t);$('copyCsv').textContent='Copié – collez dans Excel'}catch(e){$('copyCsv').textContent='Copie refusée'}};
@@ -366,7 +389,7 @@ const ficheHtml=v=>{const r=(l,x)=>`<tr><th>${l}</th><td>${esc(x)||'&nbsp;'}</td
   return `<section class="fiche"><h1>Fiche individuelle de police</h1><p class="sub">Séjour au Maroc · ${SEJ.arr} → ${SEJ.dep} · Institut Ibn Malik</p>
   <table>${r('Nom',v.nom)}${r('Prénom(s)',v.prenoms)}${r('Sexe',v.sexe)}${r('Date de naissance',fr(v.naissance))}${r('Lieu de naissance',v.lieuNaissance)}${r('Nationalité',v.nationalite)}${r('Profession',v.profession)}${r('Adresse habituelle',v.adresse)}
   ${r('Passeport n°',v.ppNum)}${r('Délivré le / pays',[fr(v.ppDelivrance),v.ppPays].filter(Boolean).join(' · '))}${r('Valable jusqu\'au',fr(v.ppExpiration))}
-  ${r('Carte d\'identité n°',v.ciNum)}${r('Délivrée le',fr(v.ciDelivrance))}${r('Valable jusqu\'au',fr(v.ciExpiration))}
+  ${r('Carte d\'identité n°',v.ciNum)}${r('Délivrée le / pays',[fr(v.ciDelivrance),v.ciPays].filter(Boolean).join(' · '))}${r('Valable jusqu\'au',fr(v.ciExpiration))}
   ${r('Date d\'arrivée',SEJ.arr)}${r('Date de départ',SEJ.dep)}${r('Motif du séjour','Tourisme')}${r('Établissement / adresse au Maroc','')}${r('Téléphone',v.tel)}${r('E-mail',v.email)}</table>
   <p class="sig">Date : ____ / ____ / ________ &nbsp;&nbsp;&nbsp;&nbsp; Signature :</p></section>`};
 function showFiches(list){let d=$('fiches');if(d)d.remove();d=document.createElement('div');d.id='fiches';
@@ -454,8 +477,9 @@ const emptyPerson=()=>!f.nom.value.trim()&&!f.prenoms.value.trim()&&!pieces.leng
 function collect(){let first=null;
   f.querySelectorAll('input,select,textarea').forEach(i=>{i.classList.remove('bad');if(!i.checkValidity()){i.classList.add('bad');first=first||i}});
   if(busy){say('Patientez, le document est en cours de traitement.',false);return null}
-  const needV=pieces.length&&!f.querySelector('input[name=voile]:checked');
-  if(needV&&!first){say('Indiquez « avec voile » ou « sans voile » pour le document joint.',false);$('pv').scrollIntoView({block:'center'});return null}
+  if(pieces.length<2&&!first){$('pv').classList.add('bad');say("Joignez les copies du passeport et de la carte d'identité (au moins 2 photos ou fichiers).",false);$('pv').scrollIntoView({block:'center'});return null}
+  const needV=!f.querySelector('input[name=voile]:checked');
+  if(needV&&!first){say('Indiquez « avec voile » ou « sans voile » sur la photo du document.',false);$('pv').scrollIntoView({block:'center'});return null}
   if(first){say('Complétez les champs obligatoires (encadrés en rouge).',false);first.focus();return null}
   const exp=[['ppExpiration','Le passeport'],['ciExpiration',"La carte d'identité"]].find(([k])=>new Date(f[k].value)<new Date());
   if(exp){f[exp[0]].classList.add('bad');say(exp[1]+' est expiré(e).',false);return null}
