@@ -261,7 +261,7 @@ th{font-weight:700;color:var(--mut)}
 <script>
 {
 const LINK="https://generalmanagerapp.github.io/voyage-ibn-malik/";
-const ADMIN_EMAIL="tozbarr@gmail.com";
+const ADMINS=["tozbarr@gmail.com","babcha42@yahoo.fr"];
 const FB={apiKey:"AIzaSyDeE_IxRFd9r0YlQ2h9jsclekeCfbukjO0",authDomain:"voyage-ibn-malik.firebaseapp.com",projectId:"voyage-ibn-malik",storageBucket:"voyage-ibn-malik.firebasestorage.app",messagingSenderId:"238018701995",appId:"1:238018701995:web:a4346477688d44c77865ee"};
 const DEFAULT_CFG={"circuit": "Ville à définir · 2 jours\nVille à définir · 2 jours\nVille à définir · 2 jours", "desc": "Un circuit au Maroc en minibus et voitures de location : on reste 2 jours à chaque étape, puis on change de ville. Les villes seront choisies prochainement.", "prix": "", "sous": "Du 17 au 24 avril 2027 · Inscription pour la réservation des billets d'avion", "titre": "Voyage au Maroc", "transport": "Minibus et voitures de location, 2 jours dans chaque ville.", "volAller": "Aller · sam. 17 avril · Barcelone 7h30 → Tanger 7h30 · Vueling, direct", "volNote": "Tarif indicatif : à partir de 62 € l'aller-retour par personne, bagage en soute en plus. Sujet à changement.", "volRetour": "Retour · sam. 24 avril · Tanger 8h20 → Barcelone 12h15 · Vueling, direct"};
 const $=id=>document.getElementById(id);
@@ -447,7 +447,7 @@ f.addEventListener('submit',async e=>{
     if(unsub){unsub();unsub=null}
     if(!u){owner=false;uid=null;mine=[];renderMine();try{await auth.signInAnonymously()}catch(e){}return}
     uid=u.uid;
-    owner=!u.isAnonymous&&u.emailVerified&&u.email===ADMIN_EMAIL;
+    owner=!u.isAnonymous&&u.emailVerified&&ADMINS.includes((u.email||"").toLowerCase());
     $('adm').textContent=owner?'Quitter':'Admin';
     $('tabs').classList.toggle('hide',!owner);$('editBox').classList.toggle('hide',!owner);route();
     if(!owner){if(!u.isAnonymous){await auth.signOut();say("Ce compte n'a pas accès à l'espace organisateur.",false);return}
