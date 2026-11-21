@@ -405,7 +405,7 @@ const JPG=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 const DEF_VILLES=[{id:0,nom:'Tanger'},{id:1,nom:'Fès'},{id:3,nom:'Meknès'},{id:2,nom:'Oujda'}];
 const GRAD_DEF={0:'url(img/tanger.jpg)',1:'url(img/fes.jpg)',2:'url(img/oujda.jpg)',3:'url(img/meknes.jpg)'};
 const GRADF=['linear-gradient(135deg,#b5651d,#e0a96d 55%,#7a4a21)','linear-gradient(135deg,#1f5f8b,#7fb7d9 55%,#1b3f5c)','linear-gradient(135deg,#6b3a5b,#c68fb0 55%,#3f2236)','linear-gradient(135deg,#2f6b4f,#8fc9a8 55%,#1c3f2f)'];
-const POSA=['center 50%','center 62%','center 28%','center 66%'];const SIZA=['cover','cover','cover','cover'];
+const POSA=['center 50%','center 62%','center 100%','center 66%'];const SIZA=['cover','cover','cover','cover'];
 const MAXV=6;
 let photos={},villes=DEF_VILLES.map(x=>({...x}));
 const bgOf=v=>photos[v.id]?`url(${photos[v.id]})`:((!v.nophoto&&GRAD_DEF[v.id])||GRADF[v.id%4]);
