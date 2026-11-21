@@ -186,6 +186,7 @@ th{font-weight:700;color:var(--mut)}
       <div><label for="naissance">Date de naissance <span class="r">*</span></label><input id="naissance" name="naissance" type="date" required></div>
       <div><label for="lieu">Lieu de naissance</label><input id="lieu" name="lieuNaissance"></div>
       <div><label for="nat">Nationalité <span class="r">*</span></label><input id="nat" name="nationalite" required value="Française"></div>
+      <div id="visaNote" class="hint" style="grid-column:1/-1;display:none;padding:10px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink)"><b>Visa :</b> selon votre nationalité, un visa pour le Maroc peut être obligatoire (e-visa en ligne, environ 70 à 115 € par personne selon le délai, à votre charge). Les organisateurs vous préciseront si c'est votre cas.</div>
       <div class="full"><label for="prof">Profession</label><input id="prof" name="profession" autocomplete="organization-title"><div class="hint">Demandée sur la fiche de police à l'arrivée</div></div>
     </div></div>
 
@@ -322,6 +323,9 @@ function renderAll(){
   $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'} <span class="hint">${esc(v.voile)}</span></td><td><button class="btn ghost" style="min-height:36px;padding:0 10px" data-fiche="${i}">Fiche</button></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.ppNum)} <span class="hint">${fr(v.ppExpiration)}</span></td><td>${esc(v.ciNum)} <span class="hint">${fr(v.ciExpiration)}</span></td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
   $('listState').textContent=all.length?'':'Aucune inscription pour le moment.';
 }
+(function(){const n=document.getElementById('nat'),v=document.getElementById('visaNote');if(!n||!v)return;
+  const f=()=>{const t=(n.value||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');v.style.display=(t&&!/^fran[cç]/.test(t)&&t!=='france')?'block':'none'};
+  n.addEventListener('input',f);f()})();
 const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['profession','Profession'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['assistance','Assistance'],['remarques','Remarques']];
 $('copyCsv').onclick=async()=>{const dates=['naissance','ppDelivrance','ppExpiration','ciDelivrance','ciExpiration'];
   const t=[COLS.map(c=>c[1]).join('\t'),...all.map(v=>COLS.map(c=>String(dates.includes(c[0])?fr(v[c[0]]):(v[c[0]]??'')).replace(/[\t\n]/g,' ')).join('\t'))].join('\n');
