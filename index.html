@@ -140,7 +140,7 @@ th{font-weight:700;color:var(--mut)}
 </style>
 </head>
 <body>
-<div class="bg" aria-hidden="true"><i data-slot="0"><span style="top:2%">Tanger</span></i><i data-slot="1"><span style="top:32%">Fès</span></i><i data-slot="2"><span style="top:57%">Tinejdad</span></i><i data-slot="3"><span style="top:82%">Chefchaouen</span></i></div>
+<div class="bg" aria-hidden="true"><i data-slot="0"><span style="top:2%">Tanger</span></i><i data-slot="1"><span style="top:32%">Fès</span></i><i data-slot="2"><span style="top:57%">Oujda</span></i><i data-slot="3"><span style="top:82%">Meknès</span></i></div>
 <div class="head">
   <img src="logo.png" alt="Logo Institut Ibn Malik">
   <div class="name">INSTITUT IBN MALIK</div>
@@ -283,7 +283,7 @@ th{font-weight:700;color:var(--mut)}
 const LINK="https://generalmanagerapp.github.io/voyage-ibn-malik/";
 const ADMINS=["tozbarr@gmail.com","babcha42@gmail.com","babcha42@yahoo.fr"];
 const FB={apiKey:"AIzaSyDeE_IxRFd9r0YlQ2h9jsclekeCfbukjO0",authDomain:"voyage-ibn-malik.firebaseapp.com",projectId:"voyage-ibn-malik",storageBucket:"voyage-ibn-malik.firebasestorage.app",messagingSenderId:"238018701995",appId:"1:238018701995:web:a4346477688d44c77865ee"};
-const DEFAULT_CFG={"circuit": "Ville à définir · 2 jours\nVille à définir · 2 jours\nVille à définir · 2 jours", "desc": "L'Institut Ibn Malik vous propose un voyage détente au Maroc : découverte, repos et beaux moments à partager entre amis et en famille.", "prix": "", "sous": "Du 17 au 24 avril 2027 · Inscription pour la réservation des billets d'avion", "titre": "Voyage au Maroc", "transport": "Minibus et voitures de location, 2 jours dans chaque ville.", "volAller": "Aller · sam. 17 avril · Barcelone 7h30 → Tanger 7h30 · Vueling, direct", "volNote": "Tarif indicatif : à partir de 62 € l'aller-retour par personne, bagage en soute en plus. Sujet à changement.", "volRetour": "Retour · sam. 24 avril · Tanger 8h20 → Barcelone 12h15 · Vueling, direct"};
+const DEFAULT_CFG={"circuit": "Tanger · 2 jours\nFès et Meknès · 2 jours\nOujda · 2 jours", "desc": "L'Institut Ibn Malik vous propose un voyage détente au Maroc : découverte, repos et beaux moments à partager entre amis et en famille.", "prix": "", "sous": "Du 17 au 24 avril 2027 · Inscription pour la réservation des billets d'avion", "titre": "Voyage au Maroc", "transport": "Minibus et voitures de location : Tanger, Fès et Meknès, puis Oujda, 2 jours dans chaque étape.", "volAller": "Aller · sam. 17 avril · Barcelone → Tanger · vol direct", "volNote": "Tarif indicatif : à partir de 85 € l'aller-retour par personne, bagage en soute en plus. Sujet à changement.", "volRetour": "Retour · sam. 24 avril · Oujda 16h05 → Barcelone 19h50 · Ryanair, direct"};
 const $=id=>document.getElementById(id);
 const root=document.documentElement;
 // thème
@@ -386,8 +386,8 @@ $('printAll').onclick=()=>{if(all.length)showFiches(all)};
 
 // présentation (créateur)
 // photos de fond
-const CITIES=['Tanger','Fès','Tinejdad','Chefchaouen'];
-const GRAD=['url(img/tanger.jpg)','url(img/fes.jpg)','url(img/tinejdad.jpg)','url(img/chefchaouen.jpg)'];
+const CITIES=['Tanger','Fès','Oujda','Meknès'];
+const GRAD=['url(img/tanger.jpg)','url(img/fes.jpg)','linear-gradient(135deg,#b5651d,#e0a96d 55%,#7a4a21)','linear-gradient(135deg,#1f5f8b,#7fb7d9 55%,#1b3f5c)'];
 const POS=['center 55%','center 62%','center 58%','center 66%'];
 const JPG=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 let photos=[];
