@@ -130,6 +130,7 @@ th{font-weight:700;color:var(--mut)}
 <div class="head">
   <img src="logo.png" alt="Logo Institut Ibn Malik">
   <div class="name">INSTITUT IBN MALIK</div>
+  <button class="th" id="adm" type="button" aria-label="Espace organisateur" title="Espace organisateur" style="width:auto;padding:0 12px;font-size:13px;font-weight:600">Organisateur</button>
   <button class="th" id="th" aria-label="Mode clair ou sombre">☾</button>
 </div>
 <nav class="tabs hide" id="tabs">
@@ -175,10 +176,10 @@ th{font-weight:700;color:var(--mut)}
 
     <div class="card"><h2>Copie du passeport ou de la carte d'identité</h2>
       <label class="btn ghost file">Ajouter le document (photo, JPG, PNG ou PDF)<input type="file" id="photoIn" accept="image/*,application/pdf" multiple></label>
-      <div class="hint">Page photo du passeport bien lisible. Carte d'identité : recto <b>et</b> verso. 3 fichiers max. <span class="r">*</span></div>
+      <div class="hint"><b>Facultatif.</b> Page photo du passeport bien lisible. Carte d'identité : recto <b>et</b> verso. 3 fichiers max.</div>
       <div class="pv" id="pv"></div>
-      <div style="margin-top:14px"><label>Sur la photo du document <span class="r">*</span></label>
-        <div class="seg"><label><input type="radio" name="voile" value="Avec voile" required> Avec voile</label><label><input type="radio" name="voile" value="Sans voile"> Sans voile</label></div>
+      <div style="margin-top:14px"><label>Sur la photo du document <span class="hint">(si vous joignez un document)</span></label>
+        <div class="seg"><label><input type="radio" name="voile" value="Avec voile"> Avec voile</label><label><input type="radio" name="voile" value="Sans voile"> Sans voile</label></div>
       </div>
     </div>
 
@@ -253,10 +254,16 @@ th{font-weight:700;color:var(--mut)}
 </section>
 </main>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 {
-const LINK="https://claude.ai/artifact/1bXdKos9t1Vyet3eU4coif";
+const LINK="https://generalmanagerapp.github.io/voyage-ibn-malik/";
+const ADMIN_EMAIL="tozbarr@gmail.com";
+const FB={apiKey:"AIzaSyDeE_IxRFd9r0YlQ2h9jsclekeCfbukjO0",authDomain:"voyage-ibn-malik.firebaseapp.com",projectId:"voyage-ibn-malik",storageBucket:"voyage-ibn-malik.firebasestorage.app",messagingSenderId:"238018701995",appId:"1:238018701995:web:a4346477688d44c77865ee"};
+const DEFAULT_CFG={"circuit": "Ville à définir · 2 jours\nVille à définir · 2 jours\nVille à définir · 2 jours", "desc": "Un circuit au Maroc en minibus et voitures de location : on reste 2 jours à chaque étape, puis on change de ville. Les villes seront choisies prochainement.", "prix": "", "sous": "Du 17 au 24 avril 2027 · Inscription pour la réservation des billets d'avion", "titre": "Voyage au Maroc", "transport": "Minibus et voitures de location, 2 jours dans chaque ville.", "volAller": "Aller · sam. 17 avril · Barcelone 7h30 → Tanger 7h30 · Vueling, direct", "volNote": "Tarif indicatif : à partir de 62 € l'aller-retour par personne, bagage en soute en plus. Sujet à changement.", "volRetour": "Retour · sam. 24 avril · Tanger 8h20 → Barcelone 12h15 · Vueling, direct"};
 const $=id=>document.getElementById(id);
 const root=document.documentElement;
 // thème
@@ -388,8 +395,8 @@ const emptyPerson=()=>!f.nom.value.trim()&&!f.prenoms.value.trim()&&!pieces.leng
 function collect(){let first=null;
   f.querySelectorAll('input,select,textarea').forEach(i=>{i.classList.remove('bad');if(!i.checkValidity()){i.classList.add('bad');first=first||i}});
   if(busy){say('Patientez, le document est en cours de traitement.',false);return null}
-  $('pv').classList.toggle('bad',!pieces.length);
-  if(!pieces.length&&!first){say("Ajoutez la copie du passeport ou de la carte d'identité.",false);$('pv').scrollIntoView({block:'center'});return null}
+  const needV=pieces.length&&!f.querySelector('input[name=voile]:checked');
+  if(needV&&!first){say('Indiquez « avec voile » ou « sans voile » pour le document joint.',false);$('pv').scrollIntoView({block:'center'});return null}
   if(first){say('Complétez les champs obligatoires (encadrés en rouge).',false);first.focus();return null}
   if(new Date(f.docExpiration.value)<new Date()){f.docExpiration.classList.add('bad');say('Le document de voyage est expiré.',false);return null}
   const v={};new FormData(f).forEach((x,k)=>v[k]=String(x).trim());
@@ -419,23 +426,36 @@ f.addEventListener('submit',async e=>{
     const next=[...mine,...list];await db.doc('inscriptions/'+uid).set({voyageurs:next,maj:Date.now()});mine=next;renderMine();pending=[];
     f.reset();resetPhoto();$('mineur').classList.add('hide');
     say('Inscription envoyée pour '+list.map(v=>v.prenoms+' '+v.nom).join(', ')+'.',true)}
-  catch(err){say(err&&err.code==='invalid_argument'?"Envoi refusé (accès non autorisé ou document trop lourd).":"L'envoi a échoué, réessayez.",false)}
+  catch(err){say(err&&(err.code==='permission-denied'||err.code==='invalid-argument')?"Envoi refusé (accès non autorisé ou document trop lourd).":"L'envoi a échoué, réessayez.",false)}
   $('go').disabled=false;renderPending();
 });
 
 (async()=>{
-  if(!window.claude)return;
-  const [d,u]=await Promise.all([claude.use('db'),claude.use('user')]);
-  db=d;
-  if(d){d.doc('config/voyage').onSnapshot(s=>{const c=s.exists?s.data():{};showCfg(c);
-    if(document.activeElement.closest&&!document.activeElement.closest('#editBox')){$('eTitre').value=c.titre||'';$('eSous').value=c.sous||'';$('eDesc').value=c.desc||'';$('ePrix').value=c.prix||'';$('eVolAller').value=c.volAller||'';$('eVolRetour').value=c.volRetour||'';$('eVolNote').value=c.volNote||'';$('eTransport').value=c.transport||'';$('eCircuit').value=c.circuit||''}},()=>{})}
-  if(d){d.collection('config').where('kind','==','photo').onSnapshot(s=>{const n=[];s.docs.forEach(x=>{const v=x.data();if(v&&v.slot>=0&&v.slot<4&&JPG.test(v.data||''))n[v.slot]=v.data});photos=n;applyPhotos()},()=>{})}
-  if(!u||!d)return;
-  uid=await u.id();owner=!!(await u.canEdit());
-  if(uid){try{const s=await db.doc('inscriptions/'+uid).get();if(s.exists){mine=(s.data().voyageurs||[]).slice();renderMine()}}catch(e){}}
-  if(owner){$('tabs').classList.remove('hide');$('editBox').classList.remove('hide');route();
+  const setCfg=c=>{showCfg(c);
+    if(document.activeElement.closest&&!document.activeElement.closest('#editBox')){$('eTitre').value=c.titre||'';$('eSous').value=c.sous||'';$('eDesc').value=c.desc||'';$('ePrix').value=c.prix||'';$('eVolAller').value=c.volAller||'';$('eVolRetour').value=c.volRetour||'';$('eVolNote').value=c.volNote||'';$('eTransport').value=c.transport||'';$('eCircuit').value=c.circuit||''}};
+  setCfg(DEFAULT_CFG);
+  if(!window.firebase){$('adm').classList.add('hide');return}
+  firebase.initializeApp(FB);
+  const auth=firebase.auth();db=firebase.firestore();
+  db.doc('config/voyage').onSnapshot(s=>setCfg(s.exists?s.data():DEFAULT_CFG),()=>{});
+  db.collection('config').where('kind','==','photo').onSnapshot(s=>{const n=[];s.docs.forEach(x=>{const v=x.data();if(v&&v.slot>=0&&v.slot<4&&JPG.test(v.data||''))n[v.slot]=v.data});photos=n;applyPhotos()},()=>{});
+  let unsub=null;
+  $('adm').onclick=async()=>{
+    if(owner){await auth.signOut();return}
+    try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){say('Connexion annulée ou refusée.',false)}};
+  auth.onAuthStateChanged(async u=>{
+    if(unsub){unsub();unsub=null}
+    if(!u){owner=false;uid=null;mine=[];renderMine();try{await auth.signInAnonymously()}catch(e){}return}
+    uid=u.uid;
+    owner=!u.isAnonymous&&u.emailVerified&&u.email===ADMIN_EMAIL;
+    $('adm').textContent=owner?'Déconnexion':'Organisateur';
+    $('tabs').classList.toggle('hide',!owner);$('editBox').classList.toggle('hide',!owner);route();
+    if(!owner){if(!u.isAnonymous){await auth.signOut();say("Ce compte n'a pas accès à l'espace organisateur.",false);return}
+      try{const s=await db.doc('inscriptions/'+uid).get();if(s.exists){mine=(s.data().voyageurs||[]).slice();renderMine()}}catch(e){}return}
+    mine=[];renderMine();
     $('listState').textContent='Chargement…';const tm=setTimeout(()=>{if(!all.length)$('listState').textContent='Données injoignables pour le moment.'},10000);
-    db.collection('inscriptions').onSnapshot(s=>{clearTimeout(tm);all=s.docs.flatMap(x=>(x.data().voyageurs||[]).map(v=>({...v,_u:x.id}))).sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));renderAll()},()=>{clearTimeout(tm);$('listState').textContent='Lecture impossible.'});}
+    unsub=db.collection('inscriptions').onSnapshot(s=>{clearTimeout(tm);all=s.docs.flatMap(x=>(x.data().voyageurs||[]).map(v=>({...v,_u:x.id}))).sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));renderAll()},()=>{clearTimeout(tm);$('listState').textContent='Lecture impossible.'});
+  });
 })();
 }
 </script>

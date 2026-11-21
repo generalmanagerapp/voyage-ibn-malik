@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'tozbarr@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    // Présentation du voyage + photos de fond : lecture publique, écriture organisateur
+    match /config/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Inscriptions : chaque famille ne touche qu'à son propre dossier ; l'organisateur lit tout
+    match /inscriptions/{uid} {
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['voyageurs', 'maj'])
+        && request.resource.data.voyageurs is list
+        && request.resource.data.voyageurs.size() <= 15;
+      allow delete: if isAdmin();
+
+      // Copies de pièces d'identité (facultatives) : envoi seul, lecture organisateur uniquement
+      match /pieces/{pid} {
+        allow read: if isAdmin();
+        allow create: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['data', 'maj'])
+          && request.resource.data.data is string
+          && request.resource.data.data.size() < 450000
+          && request.resource.data.data.matches('^data:image/jpeg;base64,.*');
+        allow delete: if isAdmin();
+      }
+    }
+  }
+}
