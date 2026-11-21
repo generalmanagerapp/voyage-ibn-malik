@@ -362,8 +362,11 @@ function resetPhoto(){pieces=[];renderPieces()}
 $('rows').addEventListener('click',async e=>{const i=e.target.dataset.see;if(i==null)return;const v=all[+i];
   const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="in"><button class="btn" type="button">Fermer</button><p style="color:#fff;margin:0"><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · passeport ${esc(v.ppNum)} · CI ${esc(v.ciNum)} · ${esc(v.voile)}</p><div id="mv" style="color:#fff">Chargement…</div></div>`;
   m.onclick=ev=>{if(ev.target===m||ev.target.tagName==='BUTTON')m.remove()};document.body.appendChild(m);
-  const imgs=[];for(const id of v.pieceIds){try{const s=await db.doc('inscriptions/'+v._u+'/pieces/'+id).get();const d=s.exists&&s.data().data;if(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d||''))imgs.push(`<img src="${d}" alt="">`)}catch(err){}}
-  m.querySelector('#mv').innerHTML=imgs.join('')||'Document introuvable.'});
+  const imgs=[];for(const id of v.pieceIds){try{const s=await db.doc('inscriptions/'+v._u+'/pieces/'+id).get();const d=s.exists&&s.data().data;if(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d||''))imgs.push(`<figure style="margin:8px 0"><img src="${d}" alt=""><button class="btn" type="button" data-del="${id}" style="margin-top:6px;background:#b3261e;color:#fff">Supprimer cette photo</button></figure>`)}catch(err){}}
+  const mv=m.querySelector('#mv');mv.innerHTML=imgs.join('')||'Aucune photo.';
+  mv.onclick=async ev=>{const b=ev.target.closest('[data-del]');if(!b)return;ev.stopPropagation();
+    if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='Confirmer : suppression définitive';return}
+    b.disabled=true;try{await db.doc('inscriptions/'+v._u+'/pieces/'+b.dataset.del).delete();b.closest('figure').remove();if(!mv.querySelector('figure'))mv.textContent='Aucune photo.'}catch(er){b.disabled=false;b.textContent='Suppression impossible'}}});
 
 // fiche de police (pré-remplie)
 const SEJ={arr:'17/04/2027',dep:'24/04/2027'};
