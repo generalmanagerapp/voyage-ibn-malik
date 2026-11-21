@@ -81,6 +81,8 @@ th{font-weight:700;color:var(--mut)}
 .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
 .bg i{position:absolute;inset:0;background:var(--g) var(--pos,center)/var(--siz,cover) no-repeat}
 .bg i span,.strip i span{position:absolute;left:3%;font:400 13px Marcellus,serif;letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.5);padding:3px 9px;border-radius:99px}
+.gal{display:none}
+@media(max-width:700px){.gal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 14px}.gal i{display:block;position:relative;aspect-ratio:4/3;border-radius:14px;background:var(--g) var(--gp,center)/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.18);overflow:hidden}.gal i span{position:absolute;left:8px;bottom:8px;font:400 12px Marcellus,serif;letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.5);padding:3px 9px;border-radius:99px}.bg{opacity:.3}.bg i span{display:none}}
 .bg::after{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 4%,transparent)}
 .hero{background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:16px;padding:6px 16px 12px;margin-bottom:16px}
 .tabs a{background:color-mix(in srgb,var(--bg) 92%,transparent);color:var(--ink)}
@@ -160,6 +162,7 @@ th{font-weight:700;color:var(--mut)}
     <div class="full"><label>Villes et photos de fond (jusqu'à 6)</label><div class="slots" id="slots"></div><div class="hint" id="slotMsg">Renommez, ajoutez ou supprimez une ville ; une photo par ville, allégée automatiquement. Tout s'enregistre tout de suite.</div></div>
     <div class="full"><button class="btn" id="eSave" type="button">Enregistrer</button> <span class="hint" id="eMsg"></span></div>
   </div></div>
+  <div class="gal" id="gal" aria-hidden="true"></div>
   <div class="hero">
   <h1 id="vTitre">Voyage – inscription</h1>
   <p class="meta" id="vSous">Renseignements pour la réservation des billets d'avion</p>
@@ -406,6 +409,8 @@ const DEF_VILLES=[{id:0,nom:'Tanger'},{id:1,nom:'Fès'},{id:3,nom:'Meknès'},{id
 const GRAD_DEF={0:'url(img/tanger.jpg)',1:'url(img/fes.jpg)',2:'url(img/oujda.jpg)',3:'url(img/meknes.jpg)'};
 const GRADF=['linear-gradient(135deg,#b5651d,#e0a96d 55%,#7a4a21)','linear-gradient(135deg,#1f5f8b,#7fb7d9 55%,#1b3f5c)','linear-gradient(135deg,#6b3a5b,#c68fb0 55%,#3f2236)','linear-gradient(135deg,#2f6b4f,#8fc9a8 55%,#1c3f2f)'];
 const POSA=['center 50%','center 62%','center 100%','center 66%'];const SIZA=['cover','cover','cover','cover'];
+const GALD={0:'url(img/tanger_g.jpg)',1:'url(img/fes.jpg)',2:'url(img/oujda_g.jpg)',3:'url(img/meknes.jpg)'},GALP=['50% 50%','center','center 25%','center 40%'];
+const galOf=v=>photos[v.id]?`url(${photos[v.id]})`:((!v.nophoto&&GALD[v.id])||GRADF[v.id%4]);
 const MAXV=6;
 let photos={},villes=DEF_VILLES.map(x=>({...x}));
 const bgOf=v=>photos[v.id]?`url(${photos[v.id]})`:((!v.nophoto&&GRAD_DEF[v.id])||GRADF[v.id%4]);
@@ -417,6 +422,7 @@ function buildBands(){const N=villes.length,bg=document.querySelector('.bg'),st=
     i.style.clipPath=`polygon(0 ${pc(L0)},100% ${pc(R0)},100% ${pc(R1)},0 ${pc(L1)})`;
     i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);i.style.setProperty('--siz',SIZA[v.id%4]);
     const sp=document.createElement('span');sp.style.top=pc(Math.max(2,k*h+(k?7:2)));sp.textContent=nomOf(v);i.appendChild(sp);return i}));
+  const gl=document.getElementById('gal');if(gl)gl.replaceChildren(...villes.map(v=>{const i=document.createElement('i');i.style.setProperty('--g',galOf(v));i.style.setProperty('--gp',photos[v.id]?'center':GALP[v.id%4]);const sp=document.createElement('span');sp.textContent=nomOf(v);i.appendChild(sp);return i}));
   if(st){const w=100/N;st.replaceChildren(...villes.map((v,k)=>{const i=document.createElement('i');
     const a=k?k*w+3.5:0,b=k<N-1?(k+1)*w+2:100,c=k<N-1?(k+1)*w-3:100,d=k?k*w-1.5:0;
     i.style.clipPath=`polygon(${pc(a)} 0,${pc(b)} 0,${pc(c)} 100%,${pc(d)} 100%)`;
