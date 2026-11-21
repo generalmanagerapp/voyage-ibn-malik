@@ -123,6 +123,15 @@ th{font-weight:700;color:var(--mut)}
 .file{position:relative;overflow:hidden}
 .file input{position:absolute;inset:0;opacity:0;cursor:pointer}
 @media(prefers-reduced-motion:no-preference){.card{animation:in .4s ease both}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
+
+#fiches{position:fixed;inset:0;z-index:100;background:#fff;color:#111;overflow:auto;padding:16px;font:14px/1.4 system-ui,sans-serif}
+#fiches .bar2{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;position:sticky;top:0;background:#fff;padding:8px 0}
+#fiches .fiche{max-width:720px;margin:0 auto 28px;padding:24px;border:1px solid #ccc}
+#fiches h1{font:700 20px Marcellus,serif;text-align:center;margin:0 0 4px;text-transform:uppercase;letter-spacing:.05em}
+#fiches .sub{text-align:center;margin:0 0 16px;color:#444}
+#fiches table{width:100%;border-collapse:collapse}#fiches th,#fiches td{border:1px solid #888;padding:7px 9px;text-align:left;vertical-align:top}
+#fiches th{width:38%;background:#f3f3f3;font-weight:600}#fiches .sig{margin-top:22px}
+@media print{body.showfiches>*:not(#fiches){display:none!important}#fiches{position:static;overflow:visible;padding:0}#fiches .noprint{display:none}#fiches .fiche{border:0;margin:0;padding:12mm;page-break-after:always}}
 </style>
 </head>
 <body>
@@ -172,6 +181,7 @@ th{font-weight:700;color:var(--mut)}
       <div><label for="naissance">Date de naissance <span class="r">*</span></label><input id="naissance" name="naissance" type="date" required></div>
       <div><label for="lieu">Lieu de naissance</label><input id="lieu" name="lieuNaissance"></div>
       <div><label for="nat">Nationalité <span class="r">*</span></label><input id="nat" name="nationalite" required value="Française"></div>
+      <div class="full"><label for="prof">Profession</label><input id="prof" name="profession" autocomplete="organization-title"><div class="hint">Demandée sur la fiche de police à l'arrivée</div></div>
     </div></div>
 
     <div class="card"><h2>Copies du passeport et de la carte d'identité</h2>
@@ -233,8 +243,8 @@ th{font-weight:700;color:var(--mut)}
 
 <section id="v-liste" class="hide">
   <h1>Inscrits</h1>
-  <div class="bar"><span class="count" id="cnt">0</span><span class="meta" style="margin:0">voyageur(s)</span><span style="flex:1"></span><button class="btn ghost" id="copyCsv">Copier pour Excel</button></div>
-  <div class="card scroll" style="padding:6px"><table><thead><tr><th>Pièce</th><th>NOM</th><th>Prénom(s)</th><th>Sexe</th><th>Naissance</th><th>Nationalité</th><th>Passeport</th><th>CI</th><th>Mineur</th><th>Téléphone</th><th>E-mail</th><th>Resp. légal</th><th>Urgence</th><th>Remarques</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="bar"><span class="count" id="cnt">0</span><span class="meta" style="margin:0">voyageur(s)</span><span style="flex:1"></span><button class="btn ghost" id="printAll">Fiches de police (toutes)</button> <button class="btn ghost" id="copyCsv">Copier pour Excel</button></div>
+  <div class="card scroll" style="padding:6px"><table><thead><tr><th>Pièce</th><th>Fiche police</th><th>NOM</th><th>Prénom(s)</th><th>Sexe</th><th>Naissance</th><th>Nationalité</th><th>Passeport</th><th>CI</th><th>Mineur</th><th>Téléphone</th><th>E-mail</th><th>Resp. légal</th><th>Urgence</th><th>Remarques</th></tr></thead><tbody id="rows"></tbody></table></div>
   <p class="state" id="listState"></p>
 </section>
 
@@ -304,10 +314,10 @@ $('mineList').onclick=async e=>{const i=e.target.dataset.i;if(i==null)return;con
 
 function renderAll(){
   $('cnt').textContent=all.length;$('nb').textContent=all.length?'('+all.length+')':'';
-  $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'} <span class="hint">${esc(v.voile)}</span></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.ppNum)} <span class="hint">${fr(v.ppExpiration)}</span></td><td>${esc(v.ciNum)} <span class="hint">${fr(v.ciExpiration)}</span></td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
+  $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'} <span class="hint">${esc(v.voile)}</span></td><td><button class="btn ghost" style="min-height:36px;padding:0 10px" data-fiche="${i}">Fiche</button></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.ppNum)} <span class="hint">${fr(v.ppExpiration)}</span></td><td>${esc(v.ciNum)} <span class="hint">${fr(v.ciExpiration)}</span></td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
   $('listState').textContent=all.length?'':'Aucune inscription pour le moment.';
 }
-const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['assistance','Assistance'],['remarques','Remarques']];
+const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['profession','Profession'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['assistance','Assistance'],['remarques','Remarques']];
 $('copyCsv').onclick=async()=>{const dates=['naissance','ppDelivrance','ppExpiration','ciDelivrance','ciExpiration'];
   const t=[COLS.map(c=>c[1]).join('\t'),...all.map(v=>COLS.map(c=>String(dates.includes(c[0])?fr(v[c[0]]):(v[c[0]]??'')).replace(/[\t\n]/g,' ')).join('\t'))].join('\n');
   try{await navigator.clipboard.writeText(t);$('copyCsv').textContent='Copié – collez dans Excel'}catch(e){$('copyCsv').textContent='Copie refusée'}};
@@ -345,6 +355,22 @@ $('rows').addEventListener('click',async e=>{const i=e.target.dataset.see;if(i==
   m.onclick=ev=>{if(ev.target===m||ev.target.tagName==='BUTTON')m.remove()};document.body.appendChild(m);
   const imgs=[];for(const id of v.pieceIds){try{const s=await db.doc('inscriptions/'+v._u+'/pieces/'+id).get();const d=s.exists&&s.data().data;if(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d||''))imgs.push(`<img src="${d}" alt="">`)}catch(err){}}
   m.querySelector('#mv').innerHTML=imgs.join('')||'Document introuvable.'});
+
+// fiche de police (pré-remplie)
+const SEJ={arr:'17/04/2027',dep:'24/04/2027'};
+const ficheHtml=v=>{const r=(l,x)=>`<tr><th>${l}</th><td>${esc(x)||'&nbsp;'}</td></tr>`;
+  return `<section class="fiche"><h1>Fiche individuelle de police</h1><p class="sub">Séjour au Maroc · ${SEJ.arr} → ${SEJ.dep} · Institut Ibn Malik</p>
+  <table>${r('Nom',v.nom)}${r('Prénom(s)',v.prenoms)}${r('Sexe',v.sexe)}${r('Date de naissance',fr(v.naissance))}${r('Lieu de naissance',v.lieuNaissance)}${r('Nationalité',v.nationalite)}${r('Profession',v.profession)}${r('Adresse habituelle',v.adresse)}
+  ${r('Passeport n°',v.ppNum)}${r('Délivré le / pays',[fr(v.ppDelivrance),v.ppPays].filter(Boolean).join(' · '))}${r('Valable jusqu\'au',fr(v.ppExpiration))}
+  ${r('Carte d\'identité n°',v.ciNum)}${r('Délivrée le',fr(v.ciDelivrance))}${r('Valable jusqu\'au',fr(v.ciExpiration))}
+  ${r('Date d\'arrivée',SEJ.arr)}${r('Date de départ',SEJ.dep)}${r('Motif du séjour','Tourisme')}${r('Établissement / adresse au Maroc','')}${r('Téléphone',v.tel)}${r('E-mail',v.email)}</table>
+  <p class="sig">Date : ____ / ____ / ________ &nbsp;&nbsp;&nbsp;&nbsp; Signature :</p></section>`};
+function showFiches(list){let d=$('fiches');if(d)d.remove();d=document.createElement('div');d.id='fiches';
+  d.innerHTML=`<div class="noprint bar2"><button class="btn" type="button" id="fPrint">Imprimer / PDF</button><button class="btn ghost" type="button" id="fClose">Fermer</button><span>Modèle pré-rempli. Vérifiez qu'il correspond à la fiche officielle demandée.</span></div>`+list.map(ficheHtml).join('');
+  document.body.appendChild(d);document.body.classList.add('showfiches');
+  $('fClose').onclick=()=>{d.remove();document.body.classList.remove('showfiches')};$('fPrint').onclick=()=>window.print()}
+$('rows').addEventListener('click',e=>{const i=e.target.dataset.fiche;if(i==null)return;showFiches([all[+i]])});
+$('printAll').onclick=()=>{if(all.length)showFiches(all)};
 
 // présentation (créateur)
 // photos de fond
@@ -394,7 +420,7 @@ $('eSave').onclick=async()=>{if(!db)return;const c={titre:$('eTitre').value.trim
 
 // plusieurs personnes
 let pending=[];
-const PERSO=['nom','prenoms','sexe','naissance','lieuNaissance','ppNum','ppDelivrance','ppExpiration','ciNum','ciDelivrance','ciExpiration','remarques'];
+const PERSO=['nom','prenoms','sexe','naissance','lieuNaissance','ppNum','ppDelivrance','ppExpiration','ciNum','ciDelivrance','ciExpiration','profession','remarques'];
 const emptyPerson=()=>!f.nom.value.trim()&&!f.prenoms.value.trim()&&!pieces.length;
 function collect(){let first=null;
   f.querySelectorAll('input,select,textarea').forEach(i=>{i.classList.remove('bad');if(!i.checkValidity()){i.classList.add('bad');first=first||i}});
