@@ -79,14 +79,14 @@ th{font-weight:700;color:var(--mut)}
 .pblock ul,.pblock ol{margin:6px 0 0;padding-left:20px}
 .pblock p{margin:4px 0}
 .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
-.bg i{position:absolute;inset:0;background:var(--g) var(--pos,center)/cover no-repeat}
+.bg i{position:absolute;inset:0;background:var(--g) var(--pos,center)/var(--siz,cover) no-repeat}
 .bg i span,.strip i span{position:absolute;left:3%;font:400 13px Marcellus,serif;letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.5);padding:3px 9px;border-radius:99px}
 .bg::after{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 4%,transparent)}
 .hero{background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:16px;padding:6px 16px 12px;margin-bottom:16px}
 .tabs a{background:color-mix(in srgb,var(--bg) 92%,transparent);color:var(--ink)}
 .poster{overflow:hidden}
 .strip{position:relative;height:110px;margin:-28px -20px 18px}
-.strip i{position:absolute;inset:0;background:var(--g) var(--pos,center)/cover no-repeat}
+.strip i{position:absolute;inset:0;background:var(--g) var(--pos,center)/var(--siz,cover) no-repeat}
 .slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media(max-width:600px){.slots{grid-template-columns:minmax(0,1fr)}}
 .slot{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px}
@@ -405,7 +405,7 @@ const JPG=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 const DEF_VILLES=[{id:0,nom:'Tanger'},{id:1,nom:'Fès'},{id:3,nom:'Meknès'},{id:2,nom:'Oujda'}];
 const GRAD_DEF={0:'url(img/tanger.jpg)',1:'url(img/fes.jpg)',2:'url(img/oujda.jpg)',3:'url(img/meknes.jpg)'};
 const GRADF=['linear-gradient(135deg,#b5651d,#e0a96d 55%,#7a4a21)','linear-gradient(135deg,#1f5f8b,#7fb7d9 55%,#1b3f5c)','linear-gradient(135deg,#6b3a5b,#c68fb0 55%,#3f2236)','linear-gradient(135deg,#2f6b4f,#8fc9a8 55%,#1c3f2f)'];
-const POSA=['center 50%','center 62%','center 58%','center 66%'];
+const POSA=['center 50%','center 62%','24% 14%','center 66%'];const SIZA=['cover','cover','170% auto','cover'];
 const MAXV=6;
 let photos={},villes=DEF_VILLES.map(x=>({...x}));
 const bgOf=v=>photos[v.id]?`url(${photos[v.id]})`:((!v.nophoto&&GRAD_DEF[v.id])||GRADF[v.id%4]);
@@ -415,12 +415,12 @@ function buildBands(){const N=villes.length,bg=document.querySelector('.bg'),st=
   bg.replaceChildren(...villes.map((v,k)=>{const i=document.createElement('i');
     const L0=k?k*h+5+.75:0,R0=k?k*h-5+.75:0,L1=k<N-1?(k+1)*h+5-.75:100,R1=k<N-1?(k+1)*h-5-.75:100;
     i.style.clipPath=`polygon(0 ${pc(L0)},100% ${pc(R0)},100% ${pc(R1)},0 ${pc(L1)})`;
-    i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);
+    i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);i.style.setProperty('--siz',SIZA[v.id%4]);
     const sp=document.createElement('span');sp.style.top=pc(Math.max(2,k*h+(k?7:2)));sp.textContent=nomOf(v);i.appendChild(sp);return i}));
   if(st){const w=100/N;st.replaceChildren(...villes.map((v,k)=>{const i=document.createElement('i');
     const a=k?k*w+3.5:0,b=k<N-1?(k+1)*w+2:100,c=k<N-1?(k+1)*w-3:100,d=k?k*w-1.5:0;
     i.style.clipPath=`polygon(${pc(a)} 0,${pc(b)} 0,${pc(c)} 100%,${pc(d)} 100%)`;
-    i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);return i}))}}
+    i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);i.style.setProperty('--siz',SIZA[v.id%4]);return i}))}}
 const saveVilles=async()=>{if(!db)return;try{await db.doc('config/villes').set({kind:'villes',list:villes.map(v=>({id:v.id,nom:v.nom,nophoto:!!v.nophoto})),maj:Date.now()});return true}catch(e){$('slotMsg').textContent='Enregistrement impossible.';return false}};
 function renderSlots(){const box=$('slots');if(!box)return;
   const rows=villes.map((v,k)=>{const d=document.createElement('div');d.className='slot';d.style.flexWrap='wrap';
