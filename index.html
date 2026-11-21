@@ -213,7 +213,6 @@ th{font-weight:700;color:var(--mut)}
     <div class="card"><h2>Urgence et infos utiles</h2><div class="grid">
       <div><label for="urgNom">Contact d'urgence <span class="r">*</span></label><input id="urgNom" name="urgNom" required></div>
       <div><label for="urgTel">Téléphone d'urgence <span class="r">*</span></label><input id="urgTel" name="urgTel" type="tel" required></div>
-      <div><label for="repas">Repas</label><select id="repas" name="repas"><option>Standard</option><option>Halal</option><option>Végétarien</option><option>Sans gluten</option><option>Autre (préciser)</option></select></div>
       <div><label for="assist">Assistance</label><select id="assist" name="assistance"><option>Aucune</option><option>Mobilité réduite</option><option>Autre (préciser)</option></select></div>
       <div class="full"><label for="rem">Remarques</label><textarea id="rem" name="remarques" rows="3" placeholder="Allergies, précisions…"></textarea></div>
     </div></div>
@@ -235,7 +234,7 @@ th{font-weight:700;color:var(--mut)}
 <section id="v-liste" class="hide">
   <h1>Inscrits</h1>
   <div class="bar"><span class="count" id="cnt">0</span><span class="meta" style="margin:0">voyageur(s)</span><span style="flex:1"></span><button class="btn ghost" id="copyCsv">Copier pour Excel</button></div>
-  <div class="card scroll" style="padding:6px"><table><thead><tr><th>Pièce</th><th>NOM</th><th>Prénom(s)</th><th>Sexe</th><th>Naissance</th><th>Nationalité</th><th>Passeport</th><th>CI</th><th>Mineur</th><th>Téléphone</th><th>E-mail</th><th>Resp. légal</th><th>Urgence</th><th>Repas</th><th>Remarques</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div class="card scroll" style="padding:6px"><table><thead><tr><th>Pièce</th><th>NOM</th><th>Prénom(s)</th><th>Sexe</th><th>Naissance</th><th>Nationalité</th><th>Passeport</th><th>CI</th><th>Mineur</th><th>Téléphone</th><th>E-mail</th><th>Resp. légal</th><th>Urgence</th><th>Remarques</th></tr></thead><tbody id="rows"></tbody></table></div>
   <p class="state" id="listState"></p>
 </section>
 
@@ -305,10 +304,10 @@ $('mineList').onclick=async e=>{const i=e.target.dataset.i;if(i==null)return;con
 
 function renderAll(){
   $('cnt').textContent=all.length;$('nb').textContent=all.length?'('+all.length+')':'';
-  $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'} <span class="hint">${esc(v.voile)}</span></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.ppNum)} <span class="hint">${fr(v.ppExpiration)}</span></td><td>${esc(v.ciNum)} <span class="hint">${fr(v.ciExpiration)}</span></td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.repas)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
+  $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'} <span class="hint">${esc(v.voile)}</span></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.ppNum)} <span class="hint">${fr(v.ppExpiration)}</span></td><td>${esc(v.ciNum)} <span class="hint">${fr(v.ciExpiration)}</span></td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
   $('listState').textContent=all.length?'':'Aucune inscription pour le moment.';
 }
-const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['repas','Repas'],['assistance','Assistance'],['remarques','Remarques']];
+const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['assistance','Assistance'],['remarques','Remarques']];
 $('copyCsv').onclick=async()=>{const dates=['naissance','ppDelivrance','ppExpiration','ciDelivrance','ciExpiration'];
   const t=[COLS.map(c=>c[1]).join('\t'),...all.map(v=>COLS.map(c=>String(dates.includes(c[0])?fr(v[c[0]]):(v[c[0]]??'')).replace(/[\t\n]/g,' ')).join('\t'))].join('\n');
   try{await navigator.clipboard.writeText(t);$('copyCsv').textContent='Copié – collez dans Excel'}catch(e){$('copyCsv').textContent='Copie refusée'}};
@@ -409,7 +408,7 @@ function collect(){let first=null;
   v.nom=v.nom.toUpperCase();v.ppNum=v.ppNum.toUpperCase();v.ciNum=v.ciNum.toUpperCase();v.mineur=minor();v.ast=minor()?$('ast').checked:null;v.recu=Date.now();v.pieces=pieces.slice();
   return v}
 function clearPerson(){PERSO.forEach(n=>{const el=f.elements[n];if(el)el.value=''});
-  f.querySelectorAll('input[name=voile]').forEach(r=>r.checked=false);f.repas.selectedIndex=0;f.assistance.selectedIndex=0;
+  f.querySelectorAll('input[name=voile]').forEach(r=>r.checked=false);f.assistance.selectedIndex=0;
   resetPhoto();$('mineur').classList.add('hide');document.querySelectorAll('[data-m]').forEach(i=>i.required=false)}
 function renderPending(){$('pend').classList.toggle('hide',!pending.length);
   $('pendList').innerHTML=pending.map((v,i)=>`<li><span><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · ${fr(v.naissance)}</span><button class="link" type="button" data-i="${i}">Retirer</button></li>`).join('');
