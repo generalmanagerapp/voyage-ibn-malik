@@ -115,6 +115,8 @@ th{font-weight:700;color:var(--mut)}
 .pv img{width:100%;height:100%;object-fit:cover;display:block}
 .pv button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;font-size:16px}
 .pv .load{display:grid;place-items:center;font-size:13px;color:var(--mut)}
+#admDlg .btn{justify-self:stretch;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+#admDlg #dG{background:var(--ink);color:var(--bg)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:grid;place-items:center;padding:20px;z-index:9;overflow:auto}
 .modal .in{max-width:900px;width:100%;display:grid;gap:12px}
 .modal img{width:100%;height:auto;border-radius:8px;background:#fff}
@@ -278,7 +280,7 @@ th{font-weight:700;color:var(--mut)}
 <script>
 {
 const LINK="https://generalmanagerapp.github.io/voyage-ibn-malik/";
-const ADMINS=["tozbarr@gmail.com","babcha42@gmail.com"];
+const ADMINS=["tozbarr@gmail.com","babcha42@gmail.com","babcha42@yahoo.fr"];
 const FB={apiKey:"AIzaSyDeE_IxRFd9r0YlQ2h9jsclekeCfbukjO0",authDomain:"voyage-ibn-malik.firebaseapp.com",projectId:"voyage-ibn-malik",storageBucket:"voyage-ibn-malik.firebasestorage.app",messagingSenderId:"238018701995",appId:"1:238018701995:web:a4346477688d44c77865ee"};
 const DEFAULT_CFG={"circuit": "Ville à définir · 2 jours\nVille à définir · 2 jours\nVille à définir · 2 jours", "desc": "L'Institut Ibn Malik vous propose un voyage détente au Maroc : découverte, repos et beaux moments à partager entre amis et en famille.", "prix": "", "sous": "Du 17 au 24 avril 2027 · Inscription pour la réservation des billets d'avion", "titre": "Voyage au Maroc", "transport": "Minibus et voitures de location, 2 jours dans chaque ville.", "volAller": "Aller · sam. 17 avril · Barcelone 7h30 → Tanger 7h30 · Vueling, direct", "volNote": "Tarif indicatif : à partir de 62 € l'aller-retour par personne, bagage en soute en plus. Sujet à changement.", "volRetour": "Retour · sam. 24 avril · Tanger 8h20 → Barcelone 12h15 · Vueling, direct"};
 const $=id=>document.getElementById(id);
@@ -474,13 +476,31 @@ f.addEventListener('submit',async e=>{
   db.doc('config/voyage').onSnapshot(s=>setCfg(s.exists?s.data():DEFAULT_CFG),()=>{});
   db.collection('config').where('kind','==','photo').onSnapshot(s=>{const n=[];s.docs.forEach(x=>{const v=x.data();if(v&&v.slot>=0&&v.slot<4&&JPG.test(v.data||''))n[v.slot]=v.data});photos=n;applyPhotos()},()=>{});
   let unsub=null;
-  $('adm').onclick=async()=>{
-    if(owner){await auth.signOut();return}
+  const googleLogin=async()=>{
     const gp=new firebase.auth.GoogleAuthProvider();gp.setCustomParameters({prompt:'select_account'});
     try{await auth.signInWithPopup(gp)}
     catch(e){
       if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'||e.code==='auth/web-storage-unsupported')){try{await auth.signInWithRedirect(gp);return}catch(e2){e=e2}}
       say('Connexion impossible ('+((e&&e.code)||'erreur')+'). Ouvrez la page dans Chrome ou Safari (pas dans une appli) et réessayez.',false)}};
+  const LINK_URL=location.origin+location.pathname;
+  const openLogin=()=>{let d=$('admDlg');if(d)d.remove();d=document.createElement('div');d.id='admDlg';d.className='modal';
+    d.innerHTML='<div class="in" style="background:var(--card);color:var(--ink);padding:20px;border-radius:16px;max-width:380px;width:100%;display:grid;gap:12px"><b style="font:400 20px Marcellus,serif">Espace organisateur</b><button class="btn" type="button" id="dG" style="background:var(--ink);color:var(--bg)">Continuer avec Google</button><div class="hint" style="text-align:center">ou, sans compte Google</div><input id="dE" type="email" placeholder="Votre e-mail (Yahoo, Outlook…)" autocomplete="email" style="min-height:48px;border-radius:12px;border:1px solid var(--line);padding:0 12px;background:var(--field);color:var(--ink);font:inherit"><button class="btn ghost" type="button" id="dL">Recevoir un lien de connexion</button><p class="hint" id="dM" style="margin:0"></p><button class="btn ghost" type="button" id="dX">Fermer</button></div>';
+    document.body.appendChild(d);
+    $('dX').onclick=()=>d.remove();
+    $('dG').onclick=()=>{d.remove();googleLogin()};
+    $('dL').onclick=async()=>{const em=$('dE').value.trim().toLowerCase();
+      if(!em||!em.includes('@')){$('dM').textContent='Saisissez votre adresse e-mail.';return}
+      if(!ADMINS.includes(em)){$('dM').textContent="Cette adresse n'a pas accès à l'espace organisateur.";return}
+      $('dL').disabled=true;
+      try{await auth.sendSignInLinkToEmail(em,{url:LINK_URL,handleCodeInApp:true});try{localStorage.setItem('ibn-mail',em)}catch(e){}
+        $('dM').textContent='Lien envoyé à '+em+'. Ouvrez-le depuis ce même appareil (vérifiez les courriers indésirables).'}
+      catch(e){$('dM').textContent='Envoi impossible ('+((e&&e.code)||'erreur')+').'}
+      $('dL').disabled=false}};
+  $('adm').onclick=async()=>{if(owner){await auth.signOut();return}openLogin()};
+  if(auth.isSignInWithEmailLink(location.href)){
+    let em='';try{em=localStorage.getItem('ibn-mail')||''}catch(e){}
+    if(!em)em=(prompt('Confirmez votre adresse e-mail pour vous connecter :')||'').trim().toLowerCase();
+    if(em){auth.signInWithEmailLink(em,location.href).then(()=>history.replaceState(null,'',LINK_URL)).catch(e=>say('Lien invalide ou expiré ('+((e&&e.code)||'erreur')+'). Redemandez un lien.',false))}}
   auth.getRedirectResult().catch(e=>say('Connexion impossible ('+((e&&e.code)||'erreur')+').',false));
   auth.onAuthStateChanged(async u=>{
     if(unsub){unsub();unsub=null}
