@@ -447,7 +447,12 @@ f.addEventListener('submit',async e=>{
   let unsub=null;
   $('adm').onclick=async()=>{
     if(owner){await auth.signOut();return}
-    try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())}catch(e){say('Connexion annulée ou refusée.',false)}};
+    const gp=new firebase.auth.GoogleAuthProvider();gp.setCustomParameters({prompt:'select_account'});
+    try{await auth.signInWithPopup(gp)}
+    catch(e){
+      if(e&&(e.code==='auth/popup-blocked'||e.code==='auth/operation-not-supported-in-this-environment'||e.code==='auth/web-storage-unsupported')){try{await auth.signInWithRedirect(gp);return}catch(e2){e=e2}}
+      say('Connexion impossible ('+((e&&e.code)||'erreur')+'). Ouvrez la page dans Chrome ou Safari (pas dans une appli) et réessayez.',false)}};
+  auth.getRedirectResult().catch(e=>say('Connexion impossible ('+((e&&e.code)||'erreur')+').',false));
   auth.onAuthStateChanged(async u=>{
     if(unsub){unsub();unsub=null}
     if(!u){owner=false;uid=null;mine=[];renderMine();try{await auth.signInAnonymously()}catch(e){}return}
@@ -455,7 +460,7 @@ f.addEventListener('submit',async e=>{
     owner=!u.isAnonymous&&u.emailVerified&&ADMINS.includes((u.email||"").toLowerCase());
     $('adm').textContent=owner?'Quitter':'Admin';
     $('tabs').classList.toggle('hide',!owner);$('editBox').classList.toggle('hide',!owner);route();
-    if(!owner){if(!u.isAnonymous){await auth.signOut();say("Ce compte n'a pas accès à l'espace organisateur.",false);return}
+    if(!owner){if(!u.isAnonymous){const em=u.email;await auth.signOut();say("Le compte "+em+" n'a pas accès à l'espace organisateur. Connectez-vous avec l'adresse Google autorisée.",false);return}
       try{const s=await db.doc('inscriptions/'+uid).get();if(s.exists){mine=(s.data().voyageurs||[]).slice();renderMine()}}catch(e){}return}
     mine=[];renderMine();
     $('listState').textContent='Chargement…';const tm=setTimeout(()=>{if(!all.length)$('listState').textContent='Données injoignables pour le moment.'},10000);
