@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Voyage Ibn Malik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: formel, élégant, rassurant pour des familles
+   IDEA: un billet d'embarquement à l'en-tête calligraphié de l'institut
+   PICTURE: le formulaire lui-même, sous l'en-tête logo
+   COLOUR and TYPE: ivoire + encre + or du logo ; Marcellus (capitales du logo) + Source Sans 3
+   LAYOUT: une colonne calme, sections en cartes "talon de billet" */
+:root{color-scheme:light dark;--bg:light-dark(#faf8f3,#14130f);--card:light-dark(#fff,#1e1c17);--ink:light-dark(#1d1c19,#f1ede4);--mut:light-dark(#6b665c,#a9a294);--gold:light-dark(#9a7a3f,#d2b26f);--line:light-dark(#e6dfd0,#353127);--field:light-dark(#fdfcf9,#17150f);--err:light-dark(#b3261e,#ff8a80);--ok:light-dark(#2f6b3a,#8fd19e)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+.head{background:#fff;border-bottom:1px solid #e6dfd0;position:relative;text-align:center;padding:22px 16px 18px}
+.head img{height:clamp(110px,22vw,160px);width:auto;display:block;margin:0 auto}
+.head .name{font:400 clamp(22px,4vw,30px)/1.05 Marcellus,serif;letter-spacing:.06em;color:#1d1c19;margin-top:8px}
+.th{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;border:1px solid #e6dfd0;background:#fff;color:#1d1c19;font-size:18px;cursor:pointer}
+.th:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.tabs{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px 16px 0}
+.tabs a{padding:9px 16px;border-radius:99px;color:var(--mut);text-decoration:none;font-weight:600;border:1px solid transparent}
+.tabs a.on{color:var(--ink);border-color:var(--line);background:var(--card)}
+main{max-width:720px;margin:0 auto;padding:18px 16px 60px}
+h1{font:400 clamp(30px,6vw,44px)/1.05 Marcellus,serif;margin:10px 0 6px;text-wrap:balance;text-align:center}
+.meta{text-align:center;color:var(--mut);margin:0 0 18px}
+.meta b{color:var(--ink);font-weight:600}
+.note{border:1px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:18px;background:color-mix(in srgb,var(--card) 90%,var(--gold))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;position:relative}
+.card h2{font:400 20px/1.2 Marcellus,serif;margin:0 0 14px;color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.full{grid-column:1/-1}
+@media(max-width:600px){.grid{grid-template-columns:minmax(0,1fr)}}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+.r{color:var(--err);white-space:nowrap}
+input,select,textarea{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--ink);font:16px "Source Sans 3",sans-serif}
+.up{text-transform:uppercase}
+.hint{font-size:13px;color:var(--mut);margin-top:4px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:15px}
+.chk input{width:22px;min-height:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--gold)}
+.bad{border-color:var(--err)!important}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font:700 16px "Source Sans 3";cursor:pointer}
+.btn.w{width:100%;min-height:54px;font-size:17px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.55}
+.msg{display:none;padding:14px;border-radius:12px;margin-top:12px}
+.msg.ok{display:block;border:1px solid var(--ok);color:var(--ok)}
+.msg.ko{display:block;border:1px solid var(--err);color:var(--err)}
+.hide{display:none!important}
+.mine li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.mine ul{list-style:none;margin:0;padding:0}
+.link{background:none;border:0;color:var(--err);cursor:pointer;font:600 14px "Source Sans 3";min-height:44px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font-weight:700;color:var(--mut)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.count{font:400 34px/1 Marcellus,serif}
+.poster{background:#fff;color:#1d1c19;border-radius:14px;border:1px solid #e6dfd0;padding:28px 20px;text-align:center;max-width:460px;margin:0 auto}
+.poster img{height:120px}
+.poster .name{font:400 22px Marcellus,serif;letter-spacing:.06em}
+.poster h3{font:400 34px/1.05 Marcellus,serif;margin:16px 0 4px}
+.poster .qr{width:min(260px,70vw);margin:18px auto;padding:12px;border:2px solid #9a7a3f;border-radius:14px}
+.poster .qr svg{width:100%;height:auto;display:block}
+.poster p{margin:4px 0;color:#4b473f}
+.state{text-align:center;color:var(--mut);padding:20px}
+.prix{text-align:center;margin:0 auto 14px;font:400 26px/1.1 Marcellus,serif;color:var(--gold)}
+.pprix{display:inline-block;margin:14px 0 4px;padding:10px 22px;border-radius:99px;background:#9a7a3f;color:#fff;font:400 26px/1.1 Marcellus,serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lines{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.lines li{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+.steps{margin:10px 0 0;padding:0;list-style:none;counter-reset:s;display:grid;gap:8px}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px dashed var(--line);border-radius:10px}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--gold);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.pblock{margin-top:14px;text-align:left;border-top:1px solid #e6dfd0;padding-top:10px;font-size:14px}
+.pblock b{font:400 16px Marcellus,serif;color:#9a7a3f}
+.pblock ul,.pblock ol{margin:6px 0 0;padding-left:20px}
+.pblock p{margin:4px 0}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
+.bg i{position:absolute;inset:0;background:var(--g) var(--pos,center)/cover no-repeat}
+.bg i:nth-child(1){clip-path:polygon(0 0,100% 0,100% 19%,0 29%)}
+.bg i:nth-child(2){clip-path:polygon(0 30.5%,100% 20.5%,100% 44%,0 54%)}
+.bg i:nth-child(3){clip-path:polygon(0 55.5%,100% 45.5%,100% 69%,0 79%)}
+.bg i:nth-child(4){clip-path:polygon(0 80.5%,100% 70.5%,100% 100%,0 100%)}
+.bg i span,.strip i span{position:absolute;left:3%;font:400 13px Marcellus,serif;letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.bg::after{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 30%,transparent)}
+.hero{background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:16px;padding:6px 16px 12px;margin-bottom:16px}
+.tabs a{background:color-mix(in srgb,var(--bg) 82%,transparent)}
+.poster{overflow:hidden}
+.strip{position:relative;height:110px;margin:-28px -20px 18px}
+.strip i{position:absolute;inset:0;background:var(--g) var(--pos,center)/cover no-repeat}
+.strip i:nth-child(1){clip-path:polygon(0 0,27% 0,22% 100%,0 100%)}
+.strip i:nth-child(2){clip-path:polygon(28.5% 0,52% 0,47% 100%,23.5% 100%)}
+.strip i:nth-child(3){clip-path:polygon(53.5% 0,77% 0,72% 100%,48.5% 100%)}
+.strip i:nth-child(4){clip-path:polygon(78.5% 0,100% 0,100% 100%,73.5% 100%)}
+.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:600px){.slots{grid-template-columns:minmax(0,1fr)}}
+.slot{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px}
+.slot .th2{width:64px;height:48px;border-radius:8px;background:var(--g) center/cover;flex:none}
+.slot b{display:block;font-size:14px}
+.slot .btn{min-height:36px;padding:0 12px;font-size:14px}
+.desc{white-space:pre-line;text-align:center;margin:0 auto 18px;max-width:60ch}
+.edit{border-style:dashed}
+.photo{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.ph{width:140px;height:140px;border-radius:12px;border:1px dashed var(--line);background:var(--field) center/cover no-repeat;display:grid;place-items:center;color:var(--mut);font-size:13px;text-align:center;flex:none}
+.ph.has{border-style:solid;color:transparent}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg label{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;font-weight:600;cursor:pointer;margin:0}
+.seg input{width:20px;min-height:20px;height:20px;accent-color:var(--gold)}
+.pv{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.pv.bad{outline:2px solid var(--err);outline-offset:4px;border-radius:8px}
+.pv figure{margin:0;position:relative;width:130px;height:92px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--field)}
+.pv img{width:100%;height:100%;object-fit:cover;display:block}
+.pv button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;font-size:16px}
+.pv .load{display:grid;place-items:center;font-size:13px;color:var(--mut)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:grid;place-items:center;padding:20px;z-index:9;overflow:auto}
+.modal .in{max-width:900px;width:100%;display:grid;gap:12px}
+.modal img{width:100%;height:auto;border-radius:8px;background:#fff}
+.modal .btn{justify-self:end;background:#fff;color:#111}
+.thumb{width:40px;height:40px;border-radius:6px;object-fit:cover;vertical-align:middle}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+@media(prefers-reduced-motion:no-preference){.card{animation:in .4s ease both}@keyframes in{from{opacity:0;transform:translateY(6px)}}}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i data-slot="0"><span style="top:2%">Tanger</span></i><i data-slot="1"><span style="top:32%">Fès</span></i><i data-slot="2"><span style="top:57%">Casablanca</span></i><i data-slot="3"><span style="top:82%">Chefchaouen</span></i></div>
+<div class="head">
+  <img src="logo.png" alt="Logo Institut Ibn Malik">
+  <div class="name">INSTITUT IBN MALIK</div>
+  <button class="th" id="th" aria-label="Mode clair ou sombre">☾</button>
+</div>
+<nav class="tabs hide" id="tabs">
+  <a href="#inscription" data-v="inscription">Inscription</a>
+  <a href="#liste" data-v="liste">Inscrits <span id="nb"></span></a>
+  <a href="#affiche" data-v="affiche">Affiche QR</a>
+</nav>
+
+<main>
+<section id="v-inscription">
+  <div class="card edit hide" id="editBox"><h2>Présentation du voyage (visible par tous)</h2><div class="grid">
+    <div class="full"><label for="eTitre">Titre</label><input id="eTitre" placeholder="Voyage – inscription"></div>
+    <div class="full"><label for="eSous">Sous-titre (destination, dates…)</label><input id="eSous" placeholder="Renseignements pour la réservation des billets d'avion"></div>
+    <div class="full"><label for="ePrix">Prix</label><input id="ePrix" placeholder="ex : 650 € par personne"></div>
+    <div class="full"><label for="eVolAller">Vol aller</label><input id="eVolAller" placeholder="sam. 17 avril · Barcelone 7h30 → Tanger 7h30 · Vueling"></div>
+    <div class="full"><label for="eVolRetour">Vol retour</label><input id="eVolRetour" placeholder="sam. 24 avril · Tanger 8h20 → Barcelone 12h15 · Vueling"></div>
+    <div class="full"><label for="eVolNote">Remarque sur le vol</label><input id="eVolNote" placeholder="Prix indicatif, bagage en soute en plus…"></div>
+    <div class="full"><label for="eTransport">Sur place (transport)</label><input id="eTransport" placeholder="Minibus et voitures de location"></div>
+    <div class="full"><label for="eCircuit">Étapes du circuit (une par ligne)</label><textarea id="eCircuit" rows="5" placeholder="Ville 1 · 2 jours&#10;Ville 2 · 2 jours"></textarea></div>
+    <div class="full"><label for="eDesc">Description du voyage</label><textarea id="eDesc" rows="5" placeholder="Programme, prix, date limite, contact…"></textarea></div>
+    <div class="full"><label>Photos de fond (4 villes)</label><div class="slots" id="slots"></div><div class="hint" id="slotMsg">Une photo par ville, recadrée et allégée automatiquement. Elle s'enregistre tout de suite.</div></div>
+    <div class="full"><button class="btn" id="eSave" type="button">Enregistrer</button> <span class="hint" id="eMsg"></span></div>
+  </div></div>
+  <div class="hero">
+  <h1 id="vTitre">Voyage – inscription</h1>
+  <p class="meta" id="vSous">Renseignements pour la réservation des billets d'avion</p>
+  <p class="prix hide" id="vPrix"></p>
+  <p class="desc" id="vDesc" style="margin-bottom:0"></p>
+  </div>
+  <div class="card hide" id="vVol"><h2>Vol</h2><ul class="lines" id="vVolL"></ul></div>
+  <div class="card hide" id="vSur"><h2>Sur place</h2><p id="vTrans" style="margin:0"></p><ol class="steps" id="vSteps"></ol></div>
+  <div class="note">Écrivez le <b>nom</b> et <b>tous les prénoms exactement comme sur le passeport</b> (ou la carte d'identité) utilisé pour voyager. Une erreur peut empêcher l'embarquement.</div>
+
+  <form id="f" novalidate>
+    <div class="card"><h2>Voyageur</h2><div class="grid">
+      <div><label for="nom">Nom de famille <span class="r">*</span></label><input id="nom" name="nom" class="up" required autocomplete="family-name"></div>
+      <div><label for="prenoms">Prénom(s) <span class="r">*</span></label><input id="prenoms" name="prenoms" required autocomplete="given-name"><div class="hint">Tous les prénoms du document</div></div>
+      <div><label for="sexe">Sexe <span class="r">*</span></label><select id="sexe" name="sexe" required><option value="">Choisir</option><option>Masculin</option><option>Féminin</option></select></div>
+      <div><label for="naissance">Date de naissance <span class="r">*</span></label><input id="naissance" name="naissance" type="date" required></div>
+      <div><label for="lieu">Lieu de naissance</label><input id="lieu" name="lieuNaissance"></div>
+      <div><label for="nat">Nationalité <span class="r">*</span></label><input id="nat" name="nationalite" required value="Française"></div>
+    </div></div>
+
+    <div class="card"><h2>Copie du passeport ou de la carte d'identité</h2>
+      <label class="btn ghost file">Ajouter le document (photo, JPG, PNG ou PDF)<input type="file" id="photoIn" accept="image/*,application/pdf" multiple></label>
+      <div class="hint">Page photo du passeport bien lisible. Carte d'identité : recto <b>et</b> verso. 3 fichiers max. <span class="r">*</span></div>
+      <div class="pv" id="pv"></div>
+      <div style="margin-top:14px"><label>Sur la photo du document <span class="r">*</span></label>
+        <div class="seg"><label><input type="radio" name="voile" value="Avec voile" required> Avec voile</label><label><input type="radio" name="voile" value="Sans voile"> Sans voile</label></div>
+      </div>
+    </div>
+
+    <div class="card"><h2>Document de voyage</h2><div class="grid">
+      <div><label for="docType">Type <span class="r">*</span></label><select id="docType" name="docType" required><option value="">Choisir</option><option>Passeport</option><option>Carte nationale d'identité</option></select></div>
+      <div><label for="docNum">Numéro <span class="r">*</span></label><input id="docNum" name="docNum" class="up" required></div>
+      <div><label for="docDel">Délivré le</label><input id="docDel" name="docDelivrance" type="date"></div>
+      <div><label for="docExp">Expire le <span class="r">*</span></label><input id="docExp" name="docExpiration" type="date" required><div class="hint">Valable pendant tout le voyage</div></div>
+      <div class="full"><label for="docPays">Pays de délivrance <span class="r">*</span></label><input id="docPays" name="docPays" required value="France"></div>
+    </div></div>
+
+    <div class="card"><h2>Coordonnées</h2><div class="grid">
+      <div><label for="tel">Téléphone <span class="r">*</span></label><input id="tel" name="tel" type="tel" required autocomplete="tel"></div>
+      <div><label for="email">E-mail <span class="r">*</span></label><input id="email" name="email" type="email" required autocomplete="email"></div>
+      <div class="full"><label for="adr">Adresse postale</label><input id="adr" name="adresse" autocomplete="street-address"></div>
+    </div></div>
+
+    <div class="card hide" id="mineur"><h2>Responsable légal</h2><div class="grid">
+      <div><label for="respNom">Nom et prénom <span class="r">*</span></label><input id="respNom" name="respNom" data-m></div>
+      <div><label for="respLien">Lien <span class="r">*</span></label><select id="respLien" name="respLien" data-m><option value="">Choisir</option><option>Mère</option><option>Père</option><option>Tuteur légal</option></select></div>
+      <div><label for="respTel">Téléphone <span class="r">*</span></label><input id="respTel" name="respTel" type="tel" data-m></div>
+      <div><label for="respEmail">E-mail</label><input id="respEmail" name="respEmail" type="email"></div>
+      <div class="full"><label class="chk"><input type="checkbox" id="ast" data-m> Je fournirai l'autorisation de sortie du territoire (Cerfa 15646) et la copie de ma pièce d'identité. <span class="r">*</span></label></div>
+    </div></div>
+
+    <div class="card"><h2>Urgence et infos utiles</h2><div class="grid">
+      <div><label for="urgNom">Contact d'urgence <span class="r">*</span></label><input id="urgNom" name="urgNom" required></div>
+      <div><label for="urgTel">Téléphone d'urgence <span class="r">*</span></label><input id="urgTel" name="urgTel" type="tel" required></div>
+      <div><label for="repas">Repas</label><select id="repas" name="repas"><option>Standard</option><option>Halal</option><option>Végétarien</option><option>Sans gluten</option><option>Autre (préciser)</option></select></div>
+      <div><label for="assist">Assistance</label><select id="assist" name="assistance"><option>Aucune</option><option>Mobilité réduite</option><option>Autre (préciser)</option></select></div>
+      <div class="full"><label for="rem">Remarques</label><textarea id="rem" name="remarques" rows="3" placeholder="Allergies, précisions…"></textarea></div>
+    </div></div>
+
+    <div class="card">
+      <label class="chk"><input type="checkbox" id="exact" required> Je certifie que les informations correspondent exactement au document de voyage. <span class="r">*</span></label>
+      <label class="chk" style="margin-top:12px"><input type="checkbox" id="rgpd" required> J'accepte que ces données servent uniquement à l'organisation du voyage et soient supprimées après. <span class="r">*</span></label>
+    </div>
+
+    <div class="card mine hide" id="pend"><h2>Personnes déjà ajoutées</h2><ul id="pendList"></ul></div>
+    <button class="btn ghost w" id="addP" type="button" style="margin-bottom:10px">+ Ajouter une autre personne</button>
+    <button class="btn w" id="go">Envoyer l'inscription</button>
+    <div class="msg" id="msg" role="status"></div>
+  </form>
+
+  <div class="card mine hide" id="mine"><h2>Vos inscriptions envoyées</h2><ul id="mineList"></ul></div>
+</section>
+
+<section id="v-liste" class="hide">
+  <h1>Inscrits</h1>
+  <div class="bar"><span class="count" id="cnt">0</span><span class="meta" style="margin:0">voyageur(s)</span><span style="flex:1"></span><button class="btn ghost" id="copyCsv">Copier pour Excel</button></div>
+  <div class="card scroll" style="padding:6px"><table><thead><tr><th>Pièce</th><th>NOM</th><th>Prénom(s)</th><th>Sexe</th><th>Naissance</th><th>Nationalité</th><th>Document</th><th>N°</th><th>Expire</th><th>Mineur</th><th>Téléphone</th><th>E-mail</th><th>Resp. légal</th><th>Urgence</th><th>Repas</th><th>Remarques</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <p class="state" id="listState"></p>
+</section>
+
+<section id="v-affiche" class="hide">
+  <div class="poster">
+    <div class="strip" aria-hidden="true"><i data-slot="0"></i><i data-slot="1"></i><i data-slot="2"></i><i data-slot="3"></i></div>
+    <img src="logo.png" alt="">
+    <div class="name">INSTITUT IBN MALIK</div>
+    <h3 id="pTitre">Voyage</h3>
+    <p id="pSous">Inscription pour la réservation des billets d'avion</p>
+    <div class="pprix hide" id="pPrix"></div>
+    <p id="pDesc" style="white-space:pre-line;margin-top:10px"></p>
+    <div class="pblock hide" id="pVol"><b>Vol</b><ul id="pVolL"></ul></div>
+    <div class="pblock hide" id="pSur"><b>Sur place</b><p id="pTrans"></p><ol id="pSteps"></ol></div>
+    <div class="qr" id="qr"></div>
+    <p><b>Scannez pour vous inscrire</b></p>
+    <p>Munissez-vous du passeport ou de la carte d'identité.</p>
+  </div>
+  <div class="bar" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="copyLink">Copier le lien</button></div>
+  <p class="state" id="linkTxt"></p>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+{
+const LINK="https://claude.ai/artifact/1bXdKos9t1Vyet3eU4coif";
+const $=id=>document.getElementById(id);
+const root=document.documentElement;
+// thème
+try{const t=localStorage.getItem('ibn-theme');if(t)root.dataset.theme=t}catch(e){}
+const isDark=()=>root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+const icon=()=>$('th').textContent=isDark()?'☀':'☾';icon();
+$('th').onclick=()=>{const n=isDark()?'light':'dark';root.dataset.theme=n;try{localStorage.setItem('ibn-theme',n)}catch(e){}icon()};
+
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fr=d=>d?d.split('-').reverse().join('/'):'';
+const f=$('f'),msg=$('msg');
+const say=(t,ok)=>{msg.className='msg '+(ok?'ok':'ko');msg.textContent=t};
+const age=d=>{if(!d)return 99;const b=new Date(d),n=new Date();let a=n.getFullYear()-b.getFullYear();if(n<new Date(n.getFullYear(),b.getMonth(),b.getDate()))a--;return a};
+const minor=()=>age(f.naissance.value)<18;
+f.naissance.addEventListener('change',()=>{const m=minor();$('mineur').classList.toggle('hide',!m);document.querySelectorAll('[data-m]').forEach(i=>i.required=m)});
+
+// vues
+let owner=false;
+function route(){const v=owner?(location.hash.slice(1)||'inscription'):'inscription';
+  ['inscription','liste','affiche'].forEach(k=>$('v-'+k).classList.toggle('hide',k!==v));
+  document.querySelectorAll('.tabs a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));}
+addEventListener('hashchange',route);route();
+
+// QR
+$('linkTxt').textContent=LINK;
+try{const q=qrcode(0,'M');q.addData(LINK);q.make();$('qr').innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(e){$('qr').textContent='QR indisponible'}
+$('copyLink').onclick=async()=>{try{await navigator.clipboard.writeText(LINK);$('copyLink').textContent='Lien copié'}catch(e){$('copyLink').textContent='Copie refusée'}};
+
+let db=null,uid=null,mine=[],all=[];
+function renderMine(){$('mine').classList.toggle('hide',!mine.length);
+  $('mineList').innerHTML=mine.map((v,i)=>`<li><span><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · ${fr(v.naissance)}</span><button class="link" data-i="${i}">Retirer</button></li>`).join('')}
+$('mineList').onclick=async e=>{const i=e.target.dataset.i;if(i==null)return;const next=mine.filter((_,k)=>k!=i);
+  try{await db.doc('inscriptions/'+uid).set({voyageurs:next,maj:Date.now()});mine=next;renderMine()}catch(err){say("Suppression impossible pour l'instant.",false)}};
+
+function renderAll(){
+  $('cnt').textContent=all.length;$('nb').textContent=all.length?'('+all.length+')':'';
+  $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'} <span class="hint">${esc(v.voile)}</span></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.docType)}</td><td>${esc(v.docNum)}</td><td>${fr(v.docExpiration)}</td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.repas)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
+  $('listState').textContent=all.length?'':'Aucune inscription pour le moment.';
+}
+const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['docType','Document'],['docNum','N° document'],['docDelivrance','Délivré'],['docExpiration','Expire'],['docPays','Pays délivrance'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['repas','Repas'],['assistance','Assistance'],['remarques','Remarques']];
+$('copyCsv').onclick=async()=>{const dates=['naissance','docDelivrance','docExpiration'];
+  const t=[COLS.map(c=>c[1]).join('\t'),...all.map(v=>COLS.map(c=>String(dates.includes(c[0])?fr(v[c[0]]):(v[c[0]]??'')).replace(/[\t\n]/g,' ')).join('\t'))].join('\n');
+  try{await navigator.clipboard.writeText(t);$('copyCsv').textContent='Copié – collez dans Excel'}catch(e){$('copyCsv').textContent='Copie refusée'}};
+
+// pièces d'identité (stockées en JPEG)
+let pieces=[],busy=0;
+const LIMIT=175000;
+function canvasJpeg(c){let q=.8,out;do{out=c.toDataURL('image/jpeg',q);q-=.1}while(out.length>LIMIT&&q>.25);
+  if(out.length>LIMIT){const k=Math.sqrt(LIMIT/out.length)*.9,c2=document.createElement('canvas');c2.width=c.width*k;c2.height=c.height*k;c2.getContext('2d').drawImage(c,0,0,c2.width,c2.height);out=c2.toDataURL('image/jpeg',.6)}
+  return out}
+function fit(w,h,max){const k=Math.min(1,max/Math.max(w,h));return[Math.round(w*k),Math.round(h*k)]}
+function imgFile(file){return new Promise((ok,ko)=>{const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{const[w,h]=fit(img.width,img.height,1500),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);URL.revokeObjectURL(u);ok([canvasJpeg(c)])};
+  img.onerror=()=>{URL.revokeObjectURL(u);ko()};img.src=u})}
+let pdfReady=null;
+function loadPdf(){return pdfReady||(pdfReady=new Promise((ok,ko)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  sc.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';ok(pdfjsLib)};sc.onerror=ko;document.head.appendChild(sc)}))}
+async function pdfFile(file){const lib=await loadPdf();const pdf=await lib.getDocument({data:await file.arrayBuffer()}).promise;const out=[];
+  for(let p=1;p<=Math.min(pdf.numPages,2);p++){const page=await pdf.getPage(p),vp0=page.getViewport({scale:1}),sc=Math.min(2.5,1500/Math.max(vp0.width,vp0.height)),vp=page.getViewport({scale:sc});
+    const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+    await page.render({canvasContext:x,viewport:vp}).promise;out.push(canvasJpeg(c))}return out}
+function renderPieces(){$('pv').innerHTML=pieces.map((d,i)=>`<figure><img src="${d}" alt="Document ${i+1}"><button type="button" data-x="${i}" aria-label="Retirer">×</button></figure>`).join('')+(busy?'<figure class="load">Traitement…</figure>':'');
+  if(pieces.length)$('pv').classList.remove('bad');if(pending&&pending.length)renderPending()}
+$('pv').onclick=e=>{const i=e.target.dataset.x;if(i==null)return;pieces.splice(+i,1);renderPieces()};
+$('photoIn').onchange=async e=>{const files=[...e.target.files];e.target.value='';
+  for(const file of files){if(pieces.length>=3){say('3 fichiers maximum.',false);break}
+    busy++;renderPieces();
+    try{const r=file.type==='application/pdf'||/\.pdf$/i.test(file.name)?await pdfFile(file):await imgFile(file);pieces.push(...r.slice(0,3-pieces.length))}
+    catch(err){say('Fichier « '+file.name+' » illisible. Essayez une photo JPG ou PNG.',false)}
+    busy--;renderPieces()}};
+function resetPhoto(){pieces=[];renderPieces()}
+// visionneuse (créateur)
+$('rows').addEventListener('click',async e=>{const i=e.target.dataset.see;if(i==null)return;const v=all[+i];
+  const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="in"><button class="btn" type="button">Fermer</button><p style="color:#fff;margin:0"><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · ${esc(v.docType)} ${esc(v.docNum)} · ${esc(v.voile)}</p><div id="mv" style="color:#fff">Chargement…</div></div>`;
+  m.onclick=ev=>{if(ev.target===m||ev.target.tagName==='BUTTON')m.remove()};document.body.appendChild(m);
+  const imgs=[];for(const id of v.pieceIds){try{const s=await db.doc('inscriptions/'+v._u+'/pieces/'+id).get();const d=s.exists&&s.data().data;if(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d||''))imgs.push(`<img src="${d}" alt="">`)}catch(err){}}
+  m.querySelector('#mv').innerHTML=imgs.join('')||'Document introuvable.'});
+
+// présentation (créateur)
+// photos de fond
+const CITIES=['Tanger','Fès','Casablanca','Chefchaouen'];
+const GRAD=['url(img/tanger.jpg)','url(img/fes.jpg)','url(img/casablanca.jpg)','url(img/chefchaouen.jpg)'];
+const POS=['center 55%','center 62%','center 58%','center 66%'];
+const JPG=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
+let photos=[];
+function renderSlots(){const box=$('slots');if(!box)return;
+  box.replaceChildren(...CITIES.map((v,i)=>{const d=document.createElement('div');d.className='slot';
+    const th=document.createElement('div');th.className='th2';th.style.setProperty('--g',photos[i]?`url(${photos[i]})`:GRAD[i]);
+    const mid=document.createElement('div');mid.style.flex='1';const b=document.createElement('b');b.textContent=v;mid.appendChild(b);
+    const lab=document.createElement('label');lab.className='btn ghost file';lab.textContent=photos[i]?'Changer':'Ajouter';
+    const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=()=>setPhoto(i,inp.files[0]);lab.appendChild(inp);mid.appendChild(lab);
+    d.append(th,mid);
+    if(photos[i]){const x=document.createElement('button');x.type='button';x.className='link';x.textContent='Retirer';x.onclick=()=>delPhoto(i);d.appendChild(x)}
+    return d}))}
+function applyPhotos(){document.querySelectorAll('[data-slot]').forEach(el=>{const i=+el.dataset.slot;el.style.setProperty('--g',photos[i]?`url(${photos[i]})`:GRAD[i]);el.style.setProperty('--pos',POS[i])});renderSlots()}
+function shrinkPhoto(file){return new Promise((ok,ko)=>{const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{URL.revokeObjectURL(u);for(const max of [1100,900,720,560,440]){const w=Math.min(img.width,max),h=Math.round(img.height*w/img.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      for(let q=.8;q>=.4;q-=.1){const o=c.toDataURL('image/jpeg',q);if(o.length<=170000)return ok(o)}}ko()};
+  img.onerror=()=>{URL.revokeObjectURL(u);ko()};img.src=u})}
+async function setPhoto(i,file){if(!file||!db)return;const m=$('slotMsg');m.textContent='Traitement…';
+  try{const data=await shrinkPhoto(file);await db.doc('config/photo'+i).set({kind:'photo',slot:i,ville:CITIES[i],data,maj:Date.now()});m.textContent=CITIES[i]+' : photo enregistrée.'}
+  catch(e){m.textContent="Échec pour "+CITIES[i]+" : image illisible ou trop lourde."}}
+async function delPhoto(i){if(!db)return;try{await db.doc('config/photo'+i).delete();$('slotMsg').textContent=CITIES[i]+' : photo retirée.'}catch(e){$('slotMsg').textContent='Suppression impossible.'}}
+applyPhotos();
+const bgEl=document.querySelector('.bg'),headEl=document.querySelector('.head');
+const bgTop=()=>{bgEl.style.top=Math.max(0,headEl.offsetHeight-window.scrollY)+'px'};
+bgTop();addEventListener('scroll',bgTop,{passive:true});addEventListener('resize',bgTop);
+
+function showCfg(c){c=c||{};
+  $('vTitre').textContent=$('pTitre').textContent=c.titre||'Voyage – inscription';
+  $('vSous').textContent=$('pSous').textContent=c.sous||"Renseignements pour la réservation des billets d'avion";
+  $('vDesc').textContent=$('pDesc').textContent=c.desc||'';
+  const p=(c.prix||'').trim();$('vPrix').textContent=$('pPrix').textContent=p;$('vPrix').classList.toggle('hide',!p);$('pPrix').classList.toggle('hide',!p);
+  const fill=(ul,a)=>ul.replaceChildren(...a.map(t=>{const li=document.createElement('li');li.textContent=t;return li}));
+  const vol=[c.volAller,c.volRetour,c.volNote].map(x=>(x||'').trim()).filter(Boolean);
+  const steps=(c.circuit||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  const tr=(c.transport||'').trim();
+  fill($('vVolL'),vol);fill($('pVolL'),vol);$('vVol').classList.toggle('hide',!vol.length);$('pVol').classList.toggle('hide',!vol.length);
+  $('vTrans').textContent=$('pTrans').textContent=tr;$('vTrans').classList.toggle('hide',!tr);$('pTrans').classList.toggle('hide',!tr);
+  fill($('vSteps'),steps);fill($('pSteps'),steps);
+  $('vSur').classList.toggle('hide',!tr&&!steps.length);$('pSur').classList.toggle('hide',!tr&&!steps.length);}
+$('eSave').onclick=async()=>{if(!db)return;const c={titre:$('eTitre').value.trim(),sous:$('eSous').value.trim(),desc:$('eDesc').value.trim(),prix:$('ePrix').value.trim(),volAller:$('eVolAller').value.trim(),volRetour:$('eVolRetour').value.trim(),volNote:$('eVolNote').value.trim(),transport:$('eTransport').value.trim(),circuit:$('eCircuit').value.trim(),maj:Date.now()};
+  $('eSave').disabled=true;try{await db.doc('config/voyage').set(c);showCfg(c);$('eMsg').textContent='Enregistré'}catch(e){$('eMsg').textContent="Échec de l'enregistrement"}$('eSave').disabled=false};
+
+// plusieurs personnes
+let pending=[];
+const PERSO=['nom','prenoms','sexe','naissance','lieuNaissance','docType','docNum','docDelivrance','docExpiration','remarques'];
+const emptyPerson=()=>!f.nom.value.trim()&&!f.prenoms.value.trim()&&!pieces.length;
+function collect(){let first=null;
+  f.querySelectorAll('input,select,textarea').forEach(i=>{i.classList.remove('bad');if(!i.checkValidity()){i.classList.add('bad');first=first||i}});
+  if(busy){say('Patientez, le document est en cours de traitement.',false);return null}
+  $('pv').classList.toggle('bad',!pieces.length);
+  if(!pieces.length&&!first){say("Ajoutez la copie du passeport ou de la carte d'identité.",false);$('pv').scrollIntoView({block:'center'});return null}
+  if(first){say('Complétez les champs obligatoires (encadrés en rouge).',false);first.focus();return null}
+  if(new Date(f.docExpiration.value)<new Date()){f.docExpiration.classList.add('bad');say('Le document de voyage est expiré.',false);return null}
+  const v={};new FormData(f).forEach((x,k)=>v[k]=String(x).trim());
+  v.nom=v.nom.toUpperCase();v.docNum=v.docNum.toUpperCase();v.mineur=minor();v.ast=minor()?$('ast').checked:null;v.recu=Date.now();v.pieces=pieces.slice();
+  return v}
+function clearPerson(){PERSO.forEach(n=>{const el=f.elements[n];if(el)el.value=''});
+  f.querySelectorAll('input[name=voile]').forEach(r=>r.checked=false);f.repas.selectedIndex=0;f.assistance.selectedIndex=0;
+  resetPhoto();$('mineur').classList.add('hide');document.querySelectorAll('[data-m]').forEach(i=>i.required=false)}
+function renderPending(){$('pend').classList.toggle('hide',!pending.length);
+  $('pendList').innerHTML=pending.map((v,i)=>`<li><span><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · ${fr(v.naissance)}</span><button class="link" type="button" data-i="${i}">Retirer</button></li>`).join('');
+  $('go').textContent=pending.length?`Envoyer l'inscription (${pending.length+(emptyPerson()?0:1)} pers.)`:"Envoyer l'inscription"}
+$('pendList').onclick=e=>{const i=e.target.dataset.i;if(i==null)return;pending.splice(+i,1);renderPending()};
+f.addEventListener('input',()=>{if(pending.length)renderPending()});
+$('addP').onclick=()=>{const v=collect();if(!v)return;pending.push(v);clearPerson();renderPending();
+  say(v.prenoms+' '+v.nom+' ajouté(e). Remplissez la personne suivante (les coordonnées sont conservées).',true);$('nom').focus();$('nom').scrollIntoView({block:'center'})};
+
+f.addEventListener('submit',async e=>{
+  e.preventDefault();
+  let list;
+  if(pending.length&&emptyPerson())list=[...pending];else{const v=collect();if(!v)return;list=[...pending,v]}
+  if(!db||!uid){say("L'enregistrement n'est pas disponible sur cet appareil (connexion requise).",false);return}
+  $('go').disabled=true;$('go').textContent='Envoi…';
+  try{
+    for(const v of list){if(!v.pieces)continue;const ids=[];
+      for(const d of v.pieces){const r=db.collection('inscriptions/'+uid+'/pieces').doc();await r.set({data:d,maj:Date.now()});ids.push(r.id)}
+      v.pieceIds=ids;delete v.pieces}
+    const next=[...mine,...list];await db.doc('inscriptions/'+uid).set({voyageurs:next,maj:Date.now()});mine=next;renderMine();pending=[];
+    f.reset();resetPhoto();$('mineur').classList.add('hide');
+    say('Inscription envoyée pour '+list.map(v=>v.prenoms+' '+v.nom).join(', ')+'.',true)}
+  catch(err){say(err&&err.code==='invalid_argument'?"Envoi refusé (accès non autorisé ou document trop lourd).":"L'envoi a échoué, réessayez.",false)}
+  $('go').disabled=false;renderPending();
+});
+
+(async()=>{
+  if(!window.claude)return;
+  const [d,u]=await Promise.all([claude.use('db'),claude.use('user')]);
+  db=d;
+  if(d){d.doc('config/voyage').onSnapshot(s=>{const c=s.exists?s.data():{};showCfg(c);
+    if(document.activeElement.closest&&!document.activeElement.closest('#editBox')){$('eTitre').value=c.titre||'';$('eSous').value=c.sous||'';$('eDesc').value=c.desc||'';$('ePrix').value=c.prix||'';$('eVolAller').value=c.volAller||'';$('eVolRetour').value=c.volRetour||'';$('eVolNote').value=c.volNote||'';$('eTransport').value=c.transport||'';$('eCircuit').value=c.circuit||''}},()=>{})}
+  if(d){d.collection('config').where('kind','==','photo').onSnapshot(s=>{const n=[];s.docs.forEach(x=>{const v=x.data();if(v&&v.slot>=0&&v.slot<4&&JPG.test(v.data||''))n[v.slot]=v.data});photos=n;applyPhotos()},()=>{})}
+  if(!u||!d)return;
+  uid=await u.id();owner=!!(await u.canEdit());
+  if(uid){try{const s=await db.doc('inscriptions/'+uid).get();if(s.exists){mine=(s.data().voyageurs||[]).slice();renderMine()}}catch(e){}}
+  if(owner){$('tabs').classList.remove('hide');$('editBox').classList.remove('hide');route();
+    $('listState').textContent='Chargement…';const tm=setTimeout(()=>{if(!all.length)$('listState').textContent='Données injoignables pour le moment.'},10000);
+    db.collection('inscriptions').onSnapshot(s=>{clearTimeout(tm);all=s.docs.flatMap(x=>(x.data().voyageurs||[]).map(v=>({...v,_u:x.id}))).sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));renderAll()},()=>{clearTimeout(tm);$('listState').textContent='Lecture impossible.'});}
+})();
+}
+</script>
+</body>
+</html>
