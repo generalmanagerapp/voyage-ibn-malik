@@ -130,7 +130,7 @@ th{font-weight:700;color:var(--mut)}
 <div class="head">
   <img src="logo.png" alt="Logo Institut Ibn Malik">
   <div class="name">INSTITUT IBN MALIK</div>
-  <button class="th" id="adm" type="button" aria-label="Espace organisateur" title="Espace organisateur" style="width:auto;padding:0 12px;font-size:13px;font-weight:600">Organisateur</button>
+  <button class="th" id="adm" type="button" aria-label="Espace organisateur" title="Espace organisateur" style="width:auto;min-width:44px;padding:0 12px;font-size:13px;font-weight:600;white-space:nowrap">Admin</button>
   <button class="th" id="th" aria-label="Mode clair ou sombre">☾</button>
 </div>
 <nav class="tabs hide" id="tabs">
@@ -448,7 +448,7 @@ f.addEventListener('submit',async e=>{
     if(!u){owner=false;uid=null;mine=[];renderMine();try{await auth.signInAnonymously()}catch(e){}return}
     uid=u.uid;
     owner=!u.isAnonymous&&u.emailVerified&&u.email===ADMIN_EMAIL;
-    $('adm').textContent=owner?'Déconnexion':'Organisateur';
+    $('adm').textContent=owner?'Quitter':'Admin';
     $('tabs').classList.toggle('hide',!owner);$('editBox').classList.toggle('hide',!owner);route();
     if(!owner){if(!u.isAnonymous){await auth.signOut();say("Ce compte n'a pas accès à l'espace organisateur.",false);return}
       try{const s=await db.doc('inscriptions/'+uid).get();if(s.exists){mine=(s.data().voyageurs||[]).slice();renderMine()}}catch(e){}return}
