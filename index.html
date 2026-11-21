@@ -80,10 +80,6 @@ th{font-weight:700;color:var(--mut)}
 .pblock p{margin:4px 0}
 .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
 .bg i{position:absolute;inset:0;background:var(--g) var(--pos,center)/cover no-repeat}
-.bg i:nth-child(1){clip-path:polygon(0 0,100% 0,100% 19%,0 29%)}
-.bg i:nth-child(2){clip-path:polygon(0 30.5%,100% 20.5%,100% 44%,0 54%)}
-.bg i:nth-child(3){clip-path:polygon(0 55.5%,100% 45.5%,100% 69%,0 79%)}
-.bg i:nth-child(4){clip-path:polygon(0 80.5%,100% 70.5%,100% 100%,0 100%)}
 .bg i span,.strip i span{position:absolute;left:3%;font:400 13px Marcellus,serif;letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.5);padding:3px 9px;border-radius:99px}
 .bg::after{content:"";position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 30%,transparent)}
 .hero{background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:6px 16px 12px;margin-bottom:16px}
@@ -91,10 +87,6 @@ th{font-weight:700;color:var(--mut)}
 .poster{overflow:hidden}
 .strip{position:relative;height:110px;margin:-28px -20px 18px}
 .strip i{position:absolute;inset:0;background:var(--g) var(--pos,center)/cover no-repeat}
-.strip i:nth-child(1){clip-path:polygon(0 0,27% 0,22% 100%,0 100%)}
-.strip i:nth-child(2){clip-path:polygon(28.5% 0,52% 0,47% 100%,23.5% 100%)}
-.strip i:nth-child(3){clip-path:polygon(53.5% 0,77% 0,72% 100%,48.5% 100%)}
-.strip i:nth-child(4){clip-path:polygon(78.5% 0,100% 0,100% 100%,73.5% 100%)}
 .slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media(max-width:600px){.slots{grid-template-columns:minmax(0,1fr)}}
 .slot{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px}
@@ -140,7 +132,7 @@ th{font-weight:700;color:var(--mut)}
 </style>
 </head>
 <body>
-<div class="bg" aria-hidden="true"><i data-slot="0"><span style="top:2%">Tanger</span></i><i data-slot="1"><span style="top:32%">Fès</span></i><i data-slot="2"><span style="top:57%">Oujda</span></i><i data-slot="3"><span style="top:82%">Meknès</span></i></div>
+<div class="bg" aria-hidden="true"></div>
 <div class="head">
   <img src="logo.png" alt="Logo Institut Ibn Malik">
   <div class="name">INSTITUT IBN MALIK</div>
@@ -165,7 +157,7 @@ th{font-weight:700;color:var(--mut)}
     <div class="full"><label for="eTransport">Sur place (transport)</label><input id="eTransport" placeholder="Minibus et voitures de location"></div>
     <div class="full"><label for="eCircuit">Étapes du circuit (une par ligne)</label><textarea id="eCircuit" rows="5" placeholder="Ville 1 · 2 jours&#10;Ville 2 · 2 jours"></textarea></div>
     <div class="full"><label for="eDesc">Description du voyage</label><textarea id="eDesc" rows="5" placeholder="Programme, prix, date limite, contact…"></textarea></div>
-    <div class="full"><label>Photos de fond (4 villes)</label><div class="slots" id="slots"></div><div class="hint" id="slotMsg">Une photo par ville, recadrée et allégée automatiquement. Elle s'enregistre tout de suite.</div></div>
+    <div class="full"><label>Villes et photos de fond (jusqu'à 6)</label><div class="slots" id="slots"></div><div class="hint" id="slotMsg">Renommez, ajoutez ou supprimez une ville ; une photo par ville, allégée automatiquement. Tout s'enregistre tout de suite.</div></div>
     <div class="full"><button class="btn" id="eSave" type="button">Enregistrer</button> <span class="hint" id="eMsg"></span></div>
   </div></div>
   <div class="hero">
@@ -256,7 +248,7 @@ th{font-weight:700;color:var(--mut)}
 
 <section id="v-affiche" class="hide">
   <div class="poster">
-    <div class="strip" aria-hidden="true"><i data-slot="0"></i><i data-slot="1"></i><i data-slot="2"></i><i data-slot="3"></i></div>
+    <div class="strip" aria-hidden="true"></div>
     <img src="logo.png" alt="">
     <div class="name">INSTITUT IBN MALIK</div>
     <h3 id="pTitre">Voyage</h3>
@@ -386,29 +378,54 @@ $('printAll').onclick=()=>{if(all.length)showFiches(all)};
 
 // présentation (créateur)
 // photos de fond
-const CITIES=['Tanger','Fès','Oujda','Meknès'];
-const GRAD=['url(img/tanger.jpg)','url(img/fes.jpg)','linear-gradient(135deg,#b5651d,#e0a96d 55%,#7a4a21)','linear-gradient(135deg,#1f5f8b,#7fb7d9 55%,#1b3f5c)'];
-const POS=['center 55%','center 62%','center 58%','center 66%'];
 const JPG=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
-let photos=[];
+const DEF_VILLES=[{id:0,nom:'Tanger'},{id:1,nom:'Fès'},{id:2,nom:'Oujda'},{id:3,nom:'Meknès'}];
+const GRAD_DEF={0:'url(img/tanger.jpg)',1:'url(img/fes.jpg)'};
+const GRADF=['linear-gradient(135deg,#b5651d,#e0a96d 55%,#7a4a21)','linear-gradient(135deg,#1f5f8b,#7fb7d9 55%,#1b3f5c)','linear-gradient(135deg,#6b3a5b,#c68fb0 55%,#3f2236)','linear-gradient(135deg,#2f6b4f,#8fc9a8 55%,#1c3f2f)'];
+const POSA=['center 55%','center 62%','center 58%','center 66%'];
+const MAXV=6;
+let photos={},villes=DEF_VILLES.map(x=>({...x}));
+const bgOf=v=>photos[v.id]?`url(${photos[v.id]})`:((!v.nophoto&&GRAD_DEF[v.id])||GRADF[v.id%4]);
+const nomOf=v=>(v.nom||'').trim()||'Ville';
+function buildBands(){const N=villes.length,bg=document.querySelector('.bg'),st=document.querySelector('.strip');if(!bg)return;
+  const h=100/N,pc=n=>(+n.toFixed(2))+'%';
+  bg.replaceChildren(...villes.map((v,k)=>{const i=document.createElement('i');
+    const L0=k?k*h+5+.75:0,R0=k?k*h-5+.75:0,L1=k<N-1?(k+1)*h+5-.75:100,R1=k<N-1?(k+1)*h-5-.75:100;
+    i.style.clipPath=`polygon(0 ${pc(L0)},100% ${pc(R0)},100% ${pc(R1)},0 ${pc(L1)})`;
+    i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);
+    const sp=document.createElement('span');sp.style.top=pc(Math.max(2,k*h+(k?7:2)));sp.textContent=nomOf(v);i.appendChild(sp);return i}));
+  if(st){const w=100/N;st.replaceChildren(...villes.map((v,k)=>{const i=document.createElement('i');
+    const a=k?k*w+3.5:0,b=k<N-1?(k+1)*w+2:100,c=k<N-1?(k+1)*w-3:100,d=k?k*w-1.5:0;
+    i.style.clipPath=`polygon(${pc(a)} 0,${pc(b)} 0,${pc(c)} 100%,${pc(d)} 100%)`;
+    i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);return i}))}}
+const saveVilles=async()=>{if(!db)return;try{await db.doc('config/villes').set({kind:'villes',list:villes.map(v=>({id:v.id,nom:v.nom,nophoto:!!v.nophoto})),maj:Date.now()});return true}catch(e){$('slotMsg').textContent='Enregistrement impossible.';return false}};
 function renderSlots(){const box=$('slots');if(!box)return;
-  box.replaceChildren(...CITIES.map((v,i)=>{const d=document.createElement('div');d.className='slot';
-    const th=document.createElement('div');th.className='th2';th.style.setProperty('--g',photos[i]?`url(${photos[i]})`:GRAD[i]);
-    const mid=document.createElement('div');mid.style.flex='1';const b=document.createElement('b');b.textContent=v;mid.appendChild(b);
-    const lab=document.createElement('label');lab.className='btn ghost file';lab.textContent=photos[i]?'Changer':'Ajouter';
-    const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=()=>setPhoto(i,inp.files[0]);lab.appendChild(inp);mid.appendChild(lab);
-    d.append(th,mid);
-    if(photos[i]){const x=document.createElement('button');x.type='button';x.className='link';x.textContent='Retirer';x.onclick=()=>delPhoto(i);d.appendChild(x)}
-    return d}))}
-function applyPhotos(){document.querySelectorAll('[data-slot]').forEach(el=>{const i=+el.dataset.slot;el.style.setProperty('--g',photos[i]?`url(${photos[i]})`:GRAD[i]);el.style.setProperty('--pos',POS[i])});renderSlots()}
+  const rows=villes.map((v,k)=>{const d=document.createElement('div');d.className='slot';d.style.flexWrap='wrap';
+    const th=document.createElement('div');th.className='th2';th.style.setProperty('--g',bgOf(v));
+    const mid=document.createElement('div');mid.style.cssText='flex:1;display:grid;gap:6px;min-width:150px';
+    const nm=document.createElement('input');nm.type='text';nm.value=v.nom||'';nm.maxLength=40;nm.setAttribute('aria-label','Nom de la ville');nm.style.cssText='min-height:36px;border-radius:8px;border:1px solid var(--line);padding:0 10px;background:var(--field);color:var(--ink);font:inherit';
+    nm.onchange=async()=>{v.nom=nm.value.trim();await saveVilles();buildBands()};
+    const lab=document.createElement('label');lab.className='btn ghost file';lab.textContent=photos[v.id]?'Changer la photo':'Ajouter une photo';
+    const inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=()=>setPhoto(v,inp.files[0]);lab.appendChild(inp);
+    mid.append(nm,lab);d.append(th,mid);
+    const acts=document.createElement('div');acts.style.cssText='display:grid;gap:4px';
+    if(photos[v.id]||(!v.nophoto&&GRAD_DEF[v.id])){const x=document.createElement('button');x.type='button';x.className='link';x.textContent='Retirer la photo';x.onclick=()=>delPhoto(v);acts.appendChild(x)}
+    const y=document.createElement('button');y.type='button';y.className='link';y.textContent='Supprimer la ville';y.onclick=()=>delVille(v);acts.appendChild(y);
+    d.appendChild(acts);return d});
+  if(villes.length<MAXV){const add=document.createElement('button');add.type='button';add.className='btn ghost';add.textContent='+ Ajouter une ville';add.onclick=addVille;rows.push(add)}
+  box.replaceChildren(...rows)}
+function applyPhotos(){buildBands();renderSlots()}
 function shrinkPhoto(file){return new Promise((ok,ko)=>{const img=new Image(),u=URL.createObjectURL(file);
   img.onload=()=>{URL.revokeObjectURL(u);for(const max of [1100,900,720,560,440]){const w=Math.min(img.width,max),h=Math.round(img.height*w/img.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
       for(let q=.8;q>=.4;q-=.1){const o=c.toDataURL('image/jpeg',q);if(o.length<=170000)return ok(o)}}ko()};
   img.onerror=()=>{URL.revokeObjectURL(u);ko()};img.src=u})}
-async function setPhoto(i,file){if(!file||!db)return;const m=$('slotMsg');m.textContent='Traitement…';
-  try{const data=await shrinkPhoto(file);await db.doc('config/photo'+i).set({kind:'photo',slot:i,ville:CITIES[i],data,maj:Date.now()});m.textContent=CITIES[i]+' : photo enregistrée.'}
-  catch(e){m.textContent="Échec pour "+CITIES[i]+" : image illisible ou trop lourde."}}
-async function delPhoto(i){if(!db)return;try{await db.doc('config/photo'+i).delete();$('slotMsg').textContent=CITIES[i]+' : photo retirée.'}catch(e){$('slotMsg').textContent='Suppression impossible.'}}
+async function setPhoto(v,file){if(!file||!db)return;const m=$('slotMsg');m.textContent='Traitement…';
+  try{const data=await shrinkPhoto(file);await db.doc('config/photo'+v.id).set({kind:'photo',slot:v.id,ville:nomOf(v),data,maj:Date.now()});v.nophoto=false;await saveVilles();m.textContent=nomOf(v)+' : photo enregistrée.'}
+  catch(e){m.textContent="Échec pour "+nomOf(v)+" : image illisible ou trop lourde."}}
+async function delPhoto(v){if(!db)return;try{await db.doc('config/photo'+v.id).delete().catch(()=>{});v.nophoto=true;await saveVilles();delete photos[v.id];applyPhotos();$('slotMsg').textContent=nomOf(v)+' : photo retirée.'}catch(e){$('slotMsg').textContent='Suppression impossible.'}}
+async function delVille(v){if(!db||villes.length<=1)return;if(v._arm!==1){v._arm=1;$('slotMsg').textContent='Cliquez encore sur « Supprimer la ville » pour confirmer : '+nomOf(v)+'.';setTimeout(()=>{v._arm=0},5000);return}
+  try{await db.doc('config/photo'+v.id).delete().catch(()=>{});villes=villes.filter(x=>x!==v);delete photos[v.id];await saveVilles();applyPhotos();$('slotMsg').textContent='Ville supprimée.'}catch(e){$('slotMsg').textContent='Suppression impossible.'}}
+async function addVille(){if(villes.length>=MAXV)return;const id=villes.reduce((m,x)=>Math.max(m,x.id),-1)+1;villes.push({id,nom:'Nouvelle ville',nophoto:true});await saveVilles();applyPhotos()}
 applyPhotos();
 const bgEl=document.querySelector('.bg'),headEl=document.querySelector('.head');
 const bgTop=()=>{bgEl.style.top=Math.max(0,headEl.offsetHeight-window.scrollY)+'px'};
@@ -481,7 +498,8 @@ f.addEventListener('submit',async e=>{
   firebase.initializeApp(FB);
   const auth=firebase.auth();db=firebase.firestore();
   db.doc('config/voyage').onSnapshot(s=>setCfg(s.exists?s.data():DEFAULT_CFG),()=>{});
-  db.collection('config').where('kind','==','photo').onSnapshot(s=>{const n=[];s.docs.forEach(x=>{const v=x.data();if(v&&v.slot>=0&&v.slot<4&&JPG.test(v.data||''))n[v.slot]=v.data});photos=n;applyPhotos()},()=>{});
+  db.collection('config').where('kind','==','photo').onSnapshot(s=>{const n={};s.docs.forEach(x=>{const v=x.data();if(v&&Number.isInteger(v.slot)&&v.slot>=0&&JPG.test(v.data||''))n[v.slot]=v.data});photos=n;applyPhotos()},()=>{});
+  db.doc('config/villes').onSnapshot(s=>{const l=s.exists&&s.data().list;if(Array.isArray(l)&&l.length){villes=l.slice(0,MAXV).map(x=>({id:+x.id,nom:String(x.nom||'').slice(0,40),nophoto:!!x.nophoto}))}else villes=DEF_VILLES.map(x=>({...x}));applyPhotos()},()=>{});
   let unsub=null;
   const googleLogin=async()=>{
     const gp=new firebase.auth.GoogleAuthProvider();gp.setCustomParameters({prompt:'select_account'});
