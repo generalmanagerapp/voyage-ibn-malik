@@ -267,7 +267,7 @@ th{font-weight:700;color:var(--mut)}
     <p><b>Scannez pour vous inscrire</b></p>
     <p>Munissez-vous du passeport ou de la carte d'identité.</p>
   </div>
-  <div class="bar" style="justify-content:center;margin-top:14px"><button class="btn ghost" id="copyLink">Copier le lien</button></div>
+  <div class="bar" style="justify-content:center;margin-top:14px"><button class="btn" id="dlPdf" type="button">Télécharger l'affiche (PDF)</button><button class="btn ghost" id="dlImg" type="button">Image (PNG)</button><button class="btn ghost" id="copyLink">Copier le lien</button></div>
   <p class="state" id="linkTxt"></p>
 </section>
 </main>
@@ -309,6 +309,24 @@ addEventListener('hashchange',route);route();
 $('linkTxt').textContent=LINK;
 try{const q=qrcode(0,'M');q.addData(LINK);q.make();$('qr').innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(e){$('qr').textContent='QR indisponible'}
 $('copyLink').onclick=async()=>{try{await navigator.clipboard.writeText(LINK);$('copyLink').textContent='Lien copié'}catch(e){$('copyLink').textContent='Copie refusée'}};
+
+
+// affiche téléchargeable
+const loadJs=src=>new Promise((ok,ko)=>{if(document.querySelector('script[src="'+src+'"]'))return ok();const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>ko(new Error('chargement'));document.head.appendChild(s)});
+async function posterCanvas(){await loadJs('lib/html2canvas.min.js');
+  try{await document.fonts.ready}catch(e){}
+  return await html2canvas(document.querySelector('.poster'),{scale:3,backgroundColor:'#ffffff',useCORS:true,logging:false,onclone:d=>{const st=d.querySelector('.strip');if(st){st.style.display='flex';st.style.gap='3px';st.querySelectorAll('i').forEach(i=>{i.style.clipPath='none';i.style.position='relative';i.style.inset='auto';i.style.flex='1'})}}})}
+async function dlPoster(kind){const b=$(kind==='pdf'?'dlPdf':'dlImg'),t=b.textContent;b.disabled=true;b.textContent='Préparation…';
+  try{const was=$('v-affiche').classList.contains('hide');
+    const c=await posterCanvas();
+    if(kind==='png'){const a=document.createElement('a');a.download='affiche-voyage-ibn-malik.png';a.href=c.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove()}
+    else{await loadJs('lib/jspdf.umd.min.js');
+      const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'}),W=210,H=297,m=8;
+      let w=W-2*m,h=w*c.height/c.width;if(h>H-2*m){h=H-2*m;w=h*c.width/c.height}
+      pdf.addImage(c.toDataURL('image/jpeg',.95),'JPEG',(W-w)/2,m,w,h);pdf.save('affiche-voyage-ibn-malik.pdf')}
+  }catch(e){console.error('dlposter',e&&e.message||e);alert("Téléchargement impossible pour l'instant. Réessayez ou utilisez Imprimer.")}
+  b.disabled=false;b.textContent=t}
+$('dlPdf').onclick=()=>dlPoster('pdf');$('dlImg').onclick=()=>dlPoster('png');
 
 let db=null,uid=null,mine=[],all=[];
 function renderMine(){$('mine').classList.toggle('hide',!mine.length);
@@ -408,8 +426,8 @@ const JPG=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 const DEF_VILLES=[{id:0,nom:'Tanger'},{id:1,nom:'Fès'},{id:3,nom:'Meknès'},{id:2,nom:'Oujda'}];
 const GRAD_DEF={0:'url(img/tanger.jpg)',1:'url(img/fes.jpg)',2:'url(img/oujda.jpg)',3:'url(img/meknes.jpg)'};
 const GRADF=['linear-gradient(135deg,#b5651d,#e0a96d 55%,#7a4a21)','linear-gradient(135deg,#1f5f8b,#7fb7d9 55%,#1b3f5c)','linear-gradient(135deg,#6b3a5b,#c68fb0 55%,#3f2236)','linear-gradient(135deg,#2f6b4f,#8fc9a8 55%,#1c3f2f)'];
-const POSA=['center calc(max(100vw,162vh) * -.0847)','center 62%','center 100%','center 66%'];const SIZA=['max(100vw,162vh) auto','cover','cover','cover'];
-const GALD={0:'url(img/tanger_g.jpg)',1:'url(img/fes.jpg)',2:'url(img/oujda_g.jpg)',3:'url(img/meknes.jpg)'},GALP=['43% 50%','center','center 25%','center 40%'];
+const POSA=['center calc(max(100vw,150vh) * -.2)','center 62%','center 100%','center 66%'];const SIZA=['max(100vw,150vh) auto','cover','cover','cover'];
+const GALD={0:'url(img/tanger.jpg)',1:'url(img/fes.jpg)',2:'url(img/oujda_g.jpg)',3:'url(img/meknes.jpg)'},GALP=['55% 55%','center','center 25%','center 40%'];
 const galOf=v=>photos[v.id]?`url(${photos[v.id]})`:((!v.nophoto&&GALD[v.id])||GRADF[v.id%4]);
 const MAXV=6;
 let photos={},villes=DEF_VILLES.map(x=>({...x}));
@@ -426,7 +444,7 @@ function buildBands(){const N=villes.length,bg=document.querySelector('.bg'),st=
   if(st){const w=100/N;st.replaceChildren(...villes.map((v,k)=>{const i=document.createElement('i');
     const a=k?k*w+3.5:0,b=k<N-1?(k+1)*w+2:100,c=k<N-1?(k+1)*w-3:100,d=k?k*w-1.5:0;
     i.style.clipPath=`polygon(${pc(a)} 0,${pc(b)} 0,${pc(c)} 100%,${pc(d)} 100%)`;
-    i.style.setProperty('--g',bgOf(v));i.style.setProperty('--pos',POSA[v.id%4]);i.style.setProperty('--siz',SIZA[v.id%4]);return i}))}}
+    i.style.setProperty('--g',galOf(v));i.style.setProperty('--pos',photos[v.id]?'center':GALP[v.id%4]);return i}))}}
 const saveVilles=async()=>{if(!db)return;try{await db.doc('config/villes').set({kind:'villes',list:villes.map(v=>({id:v.id,nom:v.nom,nophoto:!!v.nophoto})),maj:Date.now()});return true}catch(e){$('slotMsg').textContent='Enregistrement impossible.';return false}};
 function renderSlots(){const box=$('slots');if(!box)return;
   const rows=villes.map((v,k)=>{const d=document.createElement('div');d.className='slot';d.style.flexWrap='wrap';
