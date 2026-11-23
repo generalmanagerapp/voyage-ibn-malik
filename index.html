@@ -185,7 +185,7 @@ th{font-weight:700;color:var(--mut)}
       <div class="full"><label for="prof">Profession</label><input id="prof" name="profession" autocomplete="organization-title"><div class="hint">Demandée sur la fiche de police à l'arrivée</div></div>
     </div></div>
 
-    <div class="card"><h2>Copies du passeport et de la carte d'identité</h2>
+    <div class="card hide" id="copiesCard"><h2>Copies du passeport et de la carte d'identité</h2>
       <label class="btn ghost file">Ajouter le document (photo, JPG, PNG ou PDF)<input type="file" id="photoIn" accept="image/*,application/pdf" multiple></label>
       <div class="hint"><b>Obligatoire.</b> Joignez les <b>deux</b> : page photo du passeport bien lisible, et carte d'identité recto <b>et</b> verso (au moins 2 fichiers, 5 max).</div>
       <div class="pv" id="pv"></div>
@@ -501,7 +501,6 @@ const emptyPerson=()=>!f.nom.value.trim()&&!f.prenoms.value.trim()&&!pieces.leng
 function collect(){let first=null;
   f.querySelectorAll('input,select,textarea').forEach(i=>{i.classList.remove('bad');if(!i.checkValidity()){i.classList.add('bad');first=first||i}});
   if(busy){say('Patientez, le document est en cours de traitement.',false);return null}
-  if(pieces.length<2&&!first){$('pv').classList.add('bad');say("Joignez les copies du passeport et de la carte d'identité (au moins 2 photos ou fichiers).",false);$('pv').scrollIntoView({block:'center'});return null}
   if(first){say('Complétez les champs obligatoires (encadrés en rouge).',false);first.focus();return null}
   const exp=[['ppExpiration','Le passeport'],['ciExpiration',"La carte d'identité"]].find(([k])=>new Date(f[k].value)<new Date());
   if(exp){f[exp[0]].classList.add('bad');say(exp[1]+' est expiré(e).',false);return null}
