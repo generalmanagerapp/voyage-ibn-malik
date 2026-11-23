@@ -189,9 +189,6 @@ th{font-weight:700;color:var(--mut)}
       <label class="btn ghost file">Ajouter le document (photo, JPG, PNG ou PDF)<input type="file" id="photoIn" accept="image/*,application/pdf" multiple></label>
       <div class="hint"><b>Obligatoire.</b> Joignez les <b>deux</b> : page photo du passeport bien lisible, et carte d'identité recto <b>et</b> verso (au moins 2 fichiers, 5 max).</div>
       <div class="pv" id="pv"></div>
-      <div style="margin-top:14px"><label>Sur la photo du document <span class="r">*</span></label>
-        <div class="seg"><label><input type="radio" name="voile" value="Avec voile"> Avec voile</label><label><input type="radio" name="voile" value="Sans voile"> Sans voile</label></div>
-      </div>
     </div>
 
     <div class="card"><h2>Passeport</h2><div class="grid">
@@ -339,7 +336,7 @@ $('mineList').onclick=async e=>{const i=e.target.dataset.i;if(i==null)return;con
 
 function renderAll(){
   $('cnt').textContent=all.length;$('nb').textContent=all.length?'('+all.length+')':'';
-  $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'} <span class="hint">${esc(v.voile)}</span></td><td><button class="btn ghost" style="min-height:36px;padding:0 10px" data-fiche="${i}">Fiche</button></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.ppNum)} <span class="hint">${fr(v.ppExpiration)}</span></td><td>${esc(v.ciNum)} <span class="hint">${fr(v.ciExpiration)}</span></td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
+  $('rows').innerHTML=all.map((v,i)=>`<tr><td>${(v.pieceIds||[]).length?`<button class="btn ghost" style="min-height:36px;padding:0 10px" data-see="${i}">Voir (${v.pieceIds.length})</button>`:'–'}</td><td><button class="btn ghost" style="min-height:36px;padding:0 10px" data-fiche="${i}">Fiche</button></td><td><b>${esc(v.nom)}</b></td><td>${esc(v.prenoms)}</td><td>${esc(v.sexe)}</td><td>${fr(v.naissance)}</td><td>${esc(v.nationalite)}</td><td>${esc(v.ppNum)} <span class="hint">${fr(v.ppExpiration)}</span></td><td>${esc(v.ciNum)} <span class="hint">${fr(v.ciExpiration)}</span></td><td>${v.mineur?'Oui':'Non'}</td><td>${esc(v.tel)}</td><td>${esc(v.email)}</td><td>${esc(v.respNom)} ${esc(v.respTel)}</td><td>${esc(v.urgNom)} ${esc(v.urgTel)}</td><td>${esc(v.remarques)}</td></tr>`).join('');
   $('listState').textContent=all.length?'':'Aucune inscription pour le moment.';
 }
 (function(){const n=document.getElementById('nat'),v=document.getElementById('visaNote');if(!n||!v)return;
@@ -365,7 +362,7 @@ function renderAll(){
     else{set(ci,'');set(pp,'');note.textContent="Nationalité étrangère : indiquez le pays qui a délivré la carte d'identité (et le passeport)."}
     note.style.display='block'};
   nat.addEventListener('input',run);run()})();
-const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['profession','Profession'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciPays','CI pays'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['voile','Photo'],['assistance','Assistance'],['remarques','Remarques']];
+const COLS=[['nom','NOM'],['prenoms','Prénoms'],['sexe','Sexe'],['naissance','Naissance'],['lieuNaissance','Lieu naissance'],['nationalite','Nationalité'],['profession','Profession'],['ppNum','N° passeport'],['ppDelivrance','Passeport délivré'],['ppExpiration','Passeport expire'],['ppPays','Pays passeport'],['ciPays','CI pays'],['ciNum','N° CI'],['ciDelivrance','CI délivrée'],['ciExpiration','CI expire'],['tel','Téléphone'],['email','E-mail'],['adresse','Adresse'],['respNom','Resp. légal'],['respLien','Lien'],['respTel','Tél. resp.'],['respEmail','E-mail resp.'],['urgNom','Urgence'],['urgTel','Tél. urgence'],['assistance','Assistance'],['remarques','Remarques']];
 $('copyCsv').onclick=async()=>{const dates=['naissance','ppDelivrance','ppExpiration','ciDelivrance','ciExpiration'];
   const t=[COLS.map(c=>c[1]).join('\t'),...all.map(v=>COLS.map(c=>String(dates.includes(c[0])?fr(v[c[0]]):(v[c[0]]??'')).replace(/[\t\n]/g,' ')).join('\t'))].join('\n');
   try{await navigator.clipboard.writeText(t);$('copyCsv').textContent='Copié – collez dans Excel'}catch(e){$('copyCsv').textContent='Copie refusée'}};
@@ -399,7 +396,7 @@ $('photoIn').onchange=async e=>{const files=[...e.target.files];e.target.value='
 function resetPhoto(){pieces=[];renderPieces()}
 // visionneuse (créateur)
 $('rows').addEventListener('click',async e=>{const i=e.target.dataset.see;if(i==null)return;const v=all[+i];
-  const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="in"><button class="btn" type="button">Fermer</button><p style="color:#fff;margin:0"><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · passeport ${esc(v.ppNum)} · CI ${esc(v.ciNum)} · ${esc(v.voile)}</p><div id="mv" style="color:#fff">Chargement…</div></div>`;
+  const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="in"><button class="btn" type="button">Fermer</button><p style="color:#fff;margin:0"><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · passeport ${esc(v.ppNum)} · CI ${esc(v.ciNum)}</p><div id="mv" style="color:#fff">Chargement…</div></div>`;
   m.onclick=ev=>{if(ev.target===m||ev.target.tagName==='BUTTON')m.remove()};document.body.appendChild(m);
   const imgs=[];for(const id of v.pieceIds){try{const s=await db.doc('inscriptions/'+v._u+'/pieces/'+id).get();const d=s.exists&&s.data().data;if(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d||''))imgs.push(`<figure style="margin:8px 0"><img src="${d}" alt=""><button class="btn" type="button" data-del="${id}" style="margin-top:6px;background:#b3261e;color:#fff">Supprimer cette photo</button></figure>`)}catch(err){}}
   const mv=m.querySelector('#mv');mv.innerHTML=imgs.join('')||'Aucune photo.';
@@ -505,8 +502,6 @@ function collect(){let first=null;
   f.querySelectorAll('input,select,textarea').forEach(i=>{i.classList.remove('bad');if(!i.checkValidity()){i.classList.add('bad');first=first||i}});
   if(busy){say('Patientez, le document est en cours de traitement.',false);return null}
   if(pieces.length<2&&!first){$('pv').classList.add('bad');say("Joignez les copies du passeport et de la carte d'identité (au moins 2 photos ou fichiers).",false);$('pv').scrollIntoView({block:'center'});return null}
-  const needV=!f.querySelector('input[name=voile]:checked');
-  if(needV&&!first){say('Indiquez « avec voile » ou « sans voile » sur la photo du document.',false);$('pv').scrollIntoView({block:'center'});return null}
   if(first){say('Complétez les champs obligatoires (encadrés en rouge).',false);first.focus();return null}
   const exp=[['ppExpiration','Le passeport'],['ciExpiration',"La carte d'identité"]].find(([k])=>new Date(f[k].value)<new Date());
   if(exp){f[exp[0]].classList.add('bad');say(exp[1]+' est expiré(e).',false);return null}
@@ -514,7 +509,7 @@ function collect(){let first=null;
   v.nom=v.nom.toUpperCase();v.ppNum=v.ppNum.toUpperCase();v.ciNum=v.ciNum.toUpperCase();v.mineur=minor();v.ast=minor()?$('ast').checked:null;v.recu=Date.now();v.pieces=pieces.slice();
   return v}
 function clearPerson(){PERSO.forEach(n=>{const el=f.elements[n];if(el)el.value=''});
-  f.querySelectorAll('input[name=voile]').forEach(r=>r.checked=false);f.assistance.selectedIndex=0;
+  f.assistance.selectedIndex=0;
   resetPhoto();$('mineur').classList.add('hide');document.querySelectorAll('[data-m]').forEach(i=>i.required=false)}
 function renderPending(){$('pend').classList.toggle('hide',!pending.length);
   $('pendList').innerHTML=pending.map((v,i)=>`<li><span><b>${esc(v.nom)}</b> ${esc(v.prenoms)} · ${fr(v.naissance)}</span><button class="link" type="button" data-i="${i}">Retirer</button></li>`).join('');
